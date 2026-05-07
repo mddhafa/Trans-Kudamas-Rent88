@@ -1,0 +1,16 @@
+services: 
+  db-service:
+    image: postgres:latest
+    container_name: agilrentstravel_container
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: agilrentstravel_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_agilrents:/var/lib/postgresql/data
+    
+volumes:
+  db_agilrents: {}
