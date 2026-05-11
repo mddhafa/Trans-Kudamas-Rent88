@@ -158,7 +158,3 @@ exports.getProfile = async (req, res) => {
     });
   }
 };
-
-exports.createMobil = async (req, res) => {
-  
-};
