@@ -16,8 +16,10 @@ router.get('/profile', verifyToken, adminController.getProfile);
 
 // Mobil Section Routes
 router.post('/tambah-mobil', verifyToken, upload.array('fotos', 5), mobilController.createMobil);
-router.put('/mobil/:id', verifyToken, upload.array('fotos', 5), mobilController.updateMobil);
-router.delete('/mobil/:id', verifyToken, mobilController.deleteMobil);
+router.put('/mobil:id', verifyToken, upload.array('fotos', 5), mobilController.updateMobil);
+router.delete('/mobil:id', verifyToken, mobilController.deleteMobil);
+// Delete single foto by id (admin)
+router.delete('/mobil/foto/:id', verifyToken, mobilController.deleteMobilFoto);
 
 // Pemesanan Section Routes
 router.get('/pemesanan', verifyToken, pemesananController.getPemesanan);
