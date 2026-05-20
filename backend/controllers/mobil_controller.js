@@ -6,12 +6,12 @@ const prisma = new PrismaClient();
 
 exports.createMobil = async (req, res) => {
     try {
-    const { nama, deskripsi } = req.body;
+    const { nama, deskripsi, kategori } = req.body;
 
-    if (!nama || !deskripsi) {
+    if (!nama || !deskripsi || !kategori) {
       return res.status(400).json({
         success: false,
-        message: 'Nama dan deskripsi harus diisi',
+        message: 'Nama, deskripsi, dan kategori harus diisi',
       });
     }
 
@@ -26,6 +26,7 @@ exports.createMobil = async (req, res) => {
       data: {
         nama,
         deskripsi,
+        kategori,
         fotos: {
           create: req.files.map((file) => ({
             url: `uploads/mobil/${file.filename}`,
@@ -103,7 +104,7 @@ exports.getMobilById = async (req, res) => {
 exports.updateMobil = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nama, deskripsi } = req.body;
+    const { nama, deskripsi, kategori } = req.body;
 
     const mobil = await prisma.mobil.findUnique({
       where: { id: parseInt(id) },
@@ -122,15 +123,29 @@ exports.updateMobil = async (req, res) => {
       data: {
         nama,
         deskripsi,
+        kategori,
       },
       include: { fotos: true },
     });
+
+    // Jika ada file yang diupload pada update, simpan juga sebagai MobilFoto
+    if (req.files && req.files.length > 0) {
+      const fotoData = req.files.map((file) => ({ mobilId: parseInt(id), url: `uploads/mobil/${file.filename}` }));
+      await prisma.mobilFoto.createMany({ data: fotoData });
+      // refresh include
+      const refreshed = await prisma.mobil.findUnique({ where: { id: parseInt(id) }, include: { fotos: true } });
+      return res.status(200).json({
+        success: true,
+        message: 'Mobil berhasil diperbarui',
+        data: refreshed,
+      });
+    }
 
     return res.status(200).json({
       success: true,
       message: 'Mobil berhasil diperbarui',
       data: updatedMobil,
-    }); 
+    });
   } catch (error) {
     console.error('Error update mobil:', error);
     return res.status(500).json({
@@ -140,9 +155,34 @@ exports.updateMobil = async (req, res) => {
   }
 };
 
+// Hapus satu foto mobil berdasarkan id foto
+exports.deleteMobilFoto = async (req, res) => {
+  try {
+    const { id } = req.params; // ini id foto
+
+    const foto = await prisma.mobilFoto.findUnique({ where: { id: parseInt(id) } });
+    if (!foto) {
+      return res.status(404).json({ success: false, message: 'Foto tidak ditemukan' });
+    }
+
+    // hapus file fisik
+    const filePath = path.join(__dirname, '..', 'uploads', 'mobil', path.basename(foto.url));
+    fs.unlink(filePath, (err) => {
+      if (err) console.error('Error hapus file foto:', err);
+    });
+
+    await prisma.mobilFoto.delete({ where: { id: parseInt(id) } });
+
+    return res.status(200).json({ success: true, message: 'Foto berhasil dihapus' });
+  } catch (error) {
+    console.error('Error delete mobil foto:', error);
+    return res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
+  }
+};
+
 exports.deleteMobil = async (req, res) => {
   try {
-    const { is } = req.params;
+    const { id } = req.params;
 
     const mobil = await prisma.mobil.findUnique({
       where: { id: parseInt(id) },

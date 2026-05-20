@@ -153,8 +153,23 @@ exports.getPemesanan = async (req, res) => {
 exports.getPemesananById = async (req, res) => {
     try {
         const { id } = req.params;
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message: 'Parameter id wajib disertakan',
+            });
+        }
+
+        const parsedId = parseInt(id, 10);
+        if (Number.isNaN(parsedId)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Parameter id tidak valid',
+            });
+        }
+
         const pemesanan = await prisma.pemesanan.findUnique({
-            where: { id: parseInt(id) },
+            where: { id: parsedId },
             include: { mobil: true }, // Include data mobil terkait
         });
 
