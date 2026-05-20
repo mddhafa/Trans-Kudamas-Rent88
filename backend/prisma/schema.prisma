@@ -1,0 +1,84 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+// Admin
+model Admin {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  email     String   @unique 
+  password  String   // Pastikan nanti di-hash (misal pakai bcrypt)
+  createdAt DateTime @default(now())
+}
+
+model ContactSetting {
+  id              Int      @id @default(autoincrement())
+  phone           String
+  whatsappNumber  String
+  email           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Mobil {
+  id          Int          @id @default(autoincrement())
+  nama        String
+  deskripsi   String
+  kategori    KategoriMobil
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  fotos       MobilFoto[]
+  pemesanans  Pemesanan[]
+}
+
+enum KategoriMobil {
+  Minibus
+  Bus
+}
+
+model MobilFoto {
+  id        Int      @id @default(autoincrement())
+  url       String
+  mobilId   Int
+  mobil     Mobil    @relation(fields: [mobilId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model Pemesanan {
+  id                  Int              @id @default(autoincrement())
+  nama                String
+  mobilId             Int
+  mobil               Mobil            @relation(fields: [mobilId], references: [id])
+  tanggalMulai        DateTime
+  tanggalSelesai      DateTime
+  lokasiPenjemputan   String
+  tujuan              String
+  jam                 String
+  noWa                String
+  email               String?          // opsional
+  perusahaan          String?          // opsional
+  catatan             String?          // opsional
+  status              StatusPemesanan  @default(PENDING)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+}
+
+enum StatusPemesanan {
+  PENDING
+  DIKONFIRMASI
+  DITOLAK
+  DIBATALKAN
+  SELESAI
+}
+

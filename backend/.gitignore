@@ -1,0 +1,59 @@
+node_modules/
+dist/
+build/
+
+# Environment variables
+.env
+.env.*
+.env.local
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Prisma generated files
+/generated/prisma
+.prisma/
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+
+# Credentials & keys
+.git-credentials
+.npmrc
+*.pem
+*.key
+*.p12
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Build & test
+coverage/
+.nyc_output/
+
+# User uploads
+uploads/**
+!uploads/.gitkeep
+
+# Cache
+.cache/
+.pnp.*
+tmp/
