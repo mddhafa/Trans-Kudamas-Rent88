@@ -1,11 +1,26 @@
 services: 
-  db-service:
-    image: postgres:latest
-    container_name: agilrentstravel_container
+
+  backend-service:
+    container_name: agilrentstravel_backend_container
+    image: agilrentstravel_backend_image
+    build:
+      context: ./backend
+      dockerfile: backend.dockerfile
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      - DATABASE_URL=postgresql://agilrentstravel_user:agil88rents@db-service:5432/agilrentstravel_db
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend/uploads:/app/uploads
+
+  db-service:
+    image: postgres:16
+    container_name: agilrentstravel_db_container
+    restart: always
+    environment:
+      POSTGRES_USER: agilrentstravel_user
+      POSTGRES_PASSWORD: agil88rents
       POSTGRES_DB: agilrentstravel_db
     ports:
       - "5432:5432"
