@@ -13,26 +13,26 @@ import {
 
 const slides = [
   {
-    title: "Perjalanan Bisnis di Jabodetabek",
+    title: "Transportasi Profesional untuk Setiap Perjalanan",
     description:
-      "Solusi transportasi profesional untuk meeting, airport transfer, dan keperluan korporat Anda",
+      "Solusi transportasi terpercaya dengan standar pelayanan profesional untuk menunjang setiap perjalanan dan agenda penting Anda.",
     image:
       // "src/imports/carousel1.png",
       "/imports/carousel1.png",
     accent: "#C9A668",
   },
   {
-    title: "Wisata & Liburan Keluarga di Yogyakarta",
+    title: "Temani Perjalanan Wisata & Keluarga Anda",
     description:
-      "Nikmati kenyamanan berwisata bersama keluarga dengan armada premium dan sopir berpengalaman",
+      "Temani perjalanan wisata dan keluarga Anda dengan kenyamanan armada premium dan pelayanan yang profesional.",
     image:
       "/imports/carousel2.jpeg",
     accent: "#8A9BB0",
   },
   {
-    title: "Armada Premium untuk Setiap Kebutuhan",
+    title: "Kenyamanan dan Pelayanan yang Terpercaya",
     description:
-      "Dari MPV hingga minibus, pilihan kendaraan berkualitas untuk perjalanan Anda",
+      "Didukung sopir berpengalaman dan standar pelayanan profesional untuk memberikan pengalaman perjalanan yang aman dan nyaman.",
     image:
       "/imports/herocarousel3.png",
     accent: "#5C7A6E",

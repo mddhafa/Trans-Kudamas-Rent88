@@ -163,46 +163,55 @@ export default function HomePage() {
                 </p>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gold/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Shield className="w-6 h-6 text-gold" />
+             <div className="space-y-4">
+                <div className="flex items-start gap-4 rounded-2xl border border-border/50 bg-background p-4 md:p-5 shadow-sm">
+                  <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-5 h-5 text-gold" />
                   </div>
+
                   <div>
                     <h3 className="font-medium mb-1 text-primary">
                       Berlisensi & Terlatih
                     </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Sopir profesional dengan sertifikat resmi
+
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Sopir profesional dengan standar pelayanan
+                      dan sertifikasi resmi.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gold/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Award className="w-6 h-6 text-gold" />
+                <div className="flex items-start gap-4 rounded-2xl border border-border/50 bg-background p-4 md:p-5 shadow-sm">
+                  <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Award className="w-5 h-5 text-gold" />
                   </div>
+
                   <div>
                     <h3 className="font-medium mb-1 text-primary">
                       Berpengalaman
                     </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Menguasai rute dan memberikan layanan
-                      terbaik
+
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Menguasai berbagai rute perjalanan dengan
+                      pelayanan yang ramah dan profesional.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gold/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Clock className="w-6 h-6 text-gold" />
+                <div className="flex items-start gap-4 rounded-2xl border border-border/50 bg-background p-4 md:p-5 shadow-sm">
+                  <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-5 h-5 text-gold" />
                   </div>
+
                   <div>
                     <h3 className="font-medium mb-1 text-primary">
                       Tidak Lepas Kunci
                     </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Layanan dengan sopir untuk kenyamanan Anda
+
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      Seluruh layanan disertai sopir untuk
+                      memastikan kenyamanan dan keamanan
+                      perjalanan.
                     </p>
                   </div>
                 </div>
