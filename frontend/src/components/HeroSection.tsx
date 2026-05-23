@@ -19,7 +19,6 @@ const slides = [
     image:
       // "src/imports/carousel1.png",
       "/imports/carousel1.png",
-    tag: "Corporate Travel",
     accent: "#C9A668",
   },
   {
@@ -28,7 +27,6 @@ const slides = [
       "Nikmati kenyamanan berwisata bersama keluarga dengan armada premium dan sopir berpengalaman",
     image:
       "/imports/carousel2.jpeg",
-    tag: "Family Trip",
     accent: "#8A9BB0",
   },
   {
@@ -36,8 +34,7 @@ const slides = [
     description:
       "Dari MPV hingga minibus, pilihan kendaraan berkualitas untuk perjalanan Anda",
     image:
-      "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1600&auto=format&fit=crop&q=80",
-    tag: "Premium Fleet",
+      "/imports/herocarousel3.png",
     accent: "#5C7A6E",
   },
 ];
@@ -126,31 +123,6 @@ export function HeroCarousel() {
                 <div className="relative z-20 flex h-full items-end">
                   <div className="mx-auto w-full max-w-7xl px-6 pb-24 lg:px-8 lg:pb-28">
                     <div className="max-w-2xl">
-                      {/* Tag */}
-                      <div
-                        className="mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1"
-                        style={{
-                          borderColor: `${slide.accent}66`,
-                          background: `${slide.accent}18`,
-                        }}
-                      >
-                        <div
-                          className="h-1.5 w-1.5 rounded-full"
-                          style={{
-                            background: slide.accent,
-                          }}
-                        />
-
-                        <span
-                          className="text-[11px] uppercase tracking-[0.2em]"
-                          style={{
-                            color: slide.accent,
-                            fontFamily: "'DM Sans', sans-serif",
-                          }}
-                        >
-                          {slide.tag}
-                        </span>
-                      </div>
 
                       {/* Heading */}
                       <h1
@@ -205,7 +177,7 @@ export function HeroCarousel() {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="absolute bottom-8 right-145 z-30 flex items-center gap-4">
+      <div className="relative z-30 flex justify-center bg-black pb-8 pt-0 -mt-6 md:absolute md:bottom-8 md:left-1/2 md:translate-y-0 md:-translate-x-1/2 md:bg-transparent md:pb-0 md:pt-0">
         {/* Counter */}
         <span
           className="text-xs"
