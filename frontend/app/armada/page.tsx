@@ -81,7 +81,7 @@ export default function CarsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="cars-header-section bg-gradient-to-r from-primary to-primary/90 text-white py-16 px-6">
+      <div className="cars-header-section bg-gradient-to-r from-primary to-primary/90 text-white pt-20 pb-10 px-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl md:text-4xl lg:text-5xl tracking-tight mb-3">
             Armada Kami
