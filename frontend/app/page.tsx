@@ -153,13 +153,8 @@ export default function HomePage() {
               transition={{ duration: 0.7 }}
             >
               <div>
-                <div className="inline-block px-4 py-2 bg-gold/10 border border-gold/20 rounded-full mb-6">
-                  <span className="text-sm text-gold uppercase tracking-widest">
-                    Pelayanan Prima
-                  </span>
-                </div>
                 <h2 className="text-4xl md:text-5xl tracking-tight leading-tight mb-6 text-primary">
-                  Sopir Profesional
+                  Pelayanan Prima
                 </h2>
                 <p className="text-lg text-muted-foreground leading-relaxed mb-8">
                   Setiap perjalanan dilayani oleh sopir
@@ -215,19 +210,60 @@ export default function HomePage() {
             </motion.div>
 
             <motion.div
-              className="relative"
+              className="relative flex justify-center lg:justify-end"
               initial={{ opacity: 0, x: 50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.2 }}
+              transition={{ duration: 0.7 }}
             >
-              <div className="relative rounded-2xl overflow-hidden shadow-xl">
-                <img
-                  src="/imports/gambardriver.png"
-                  alt="Professional Driver"
-                  className="w-full h-auto"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent" />
+              {/* Ambient Glow */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-[500px] h-[500px] rounded-full bg-gold/10 blur-3xl" />
+              </div>
+
+              {/* Main Wrapper */}
+              <div className="relative z-10 w-full max-w-[560px] pt-4 md:pt-6 pb-10 md:pb-16">
+                {/* Background Card */}
+                <div className="absolute inset-x-0 top-14 bottom-10 rounded-[40px] border border-border/50 bg-gradient-to-br from-[#F8F8F8] to-[#ECECEC] shadow-[0_25px_70px_rgba(0,0,0,0.08)]" />
+
+                {/* Decorative Accent */}
+                <div className="absolute top-6 right-10 w-24 h-24 rounded-full border border-gold/10" />
+
+                {/* Driver Image */}
+                <div className="relative z-20 flex justify-center">
+                  <motion.img
+                    src="imports/gambardriver.png"
+                    alt="Sopir Profesional"
+                    className="w-full max-w-[430px] object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.14)]"
+                    initial={{ y: 30, opacity: 0 }}
+                    whileInView={{ y: 0, opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{
+                      duration: 0.8,
+                      ease: "easeOut",
+                    }}
+                  />
+                </div>
+
+                {/* Floating Card */}
+                <motion.div
+                  className="absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-0 bottom-0 md:bottom-5 z-30 rounded-[28px] md:rounded-[34px] bg-white px-5 md:px-6 py-4 md:py-5 shadow-[0_20px_45px_rgba(0,0,0,0.12)] w-[90%] md:w-auto"
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{
+                    duration: 0.6,
+                    delay: 0.2,
+                  }}
+                >
+                  <p className="text-sm text-gold mb-1">
+                    Sopir Profesional
+                  </p>
+
+                  <p className="text-2xl md:text-3xl leading-[1.2] font-semibold tracking-tight text-primary">
+                    Pelayanan Aman & Nyaman
+                  </p>
+                </motion.div>
               </div>
             </motion.div>
           </div>
