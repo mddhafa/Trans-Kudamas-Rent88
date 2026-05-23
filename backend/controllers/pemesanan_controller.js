@@ -6,41 +6,100 @@ const prisma = new PrismaClient();
 //customers section
 exports.createPemesanan = async (req, res) => {
     try {
-        const { nama, mobilId, tanggalMulai, tanggalSelesai, lokasiPenjemputan, tujuan, jam, noWa, email, perusahaan, catatan } = req.body;
+        const {
+            nama,
+            mobilId,
+            Layanan,
+            tanggalMulai,
+            tanggalSelesai,
+            lokasiPenjemputan,
+            tujuan,
+            jamMulai,
+            jamSelesai,
+            noWa,
+            email,
+            perusahaan,
+            catatan,
+        } = req.body;
+
+        const isHourlyRental = Layanan === 'SEWA_PER_JAM';
+        const isDailyRental = Layanan === 'SEWA_HARIAN';
 
         // Validasi input
-        if (!nama || !mobilId || !tanggalMulai || !tanggalSelesai || !lokasiPenjemputan || !tujuan || !jam || !noWa) {
+        if (!nama || !mobilId || !Layanan || !tanggalMulai || !lokasiPenjemputan || !tujuan || !noWa) {
             return res.status(400).json({
                 success: false,
                 message: 'Semua field wajib diisi',
             });
         }
 
+        if (isDailyRental && !tanggalSelesai) {
+            return res.status(400).json({
+                success: false,
+                message: 'Tanggal selesai wajib diisi untuk sewa harian',
+            });
+        }
+
+        if (isHourlyRental && (!jamMulai || !jamSelesai)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Jam mulai dan jam selesai wajib diisi untuk sewa per jam',
+            });
+        }
+
+        if (isDailyRental && !jamMulai) {
+            return res.status(400).json({
+                success: false,
+                message: 'Jam penjemputan wajib diisi untuk sewa harian',
+            });
+        }
+
+        // Lookup mobil name to denormalize into pemesanan (so name remains if mobil is deleted)
+        const mobilRecord = await prisma.mobil.findUnique({ where: { id: parseInt(mobilId) } });
+
         // Simpan pemesanan ke database (contoh menggunakan Prisma)
         const pemesanan = await prisma.pemesanan.create({
             data: {
                 nama,
                 mobilId: parseInt(mobilId),
+                mobilNama: mobilRecord ? mobilRecord.nama : null,
+                Layanan,
                 tanggalMulai: new Date(tanggalMulai),
-                tanggalSelesai: new Date(tanggalSelesai),
+                tanggalSelesai: tanggalSelesai ? new Date(tanggalSelesai) : null,
                 lokasiPenjemputan,
                 tujuan,
-                jam,
+                jamMulai,
+                jamSelesai: jamSelesai || null,
                 noWa,
-                perusahaan,
-                catatan,
+                email: email || null,
+                perusahaan : perusahaan || null,
+                catatan : catatan || null,
             },
             include: { mobil: true }, // Include data mobil terkait
         });
+
+        const layananLabel = {
+            SEWA_PER_JAM: 'Sewa per jam',
+            SEWA_HARIAN: 'Sewa harian',
+            CITY_TOUR: 'City Tour',
+            LUAR_KOTA: 'Luar Kota',
+            DROP_OFF: 'Drop Off',
+            LAINNYA: 'Lainnya',
+        }[Layanan] || Layanan;
+
+        const detailWaktu = isHourlyRental
+            ? `*Tanggal Sewa:* ${new Date(tanggalMulai).toLocaleDateString('id-ID')}\n*Jam Mulai:* ${jamMulai}\n*Jam Selesai:* ${jamSelesai}`
+            : `*Tanggal Mulai:* ${new Date(tanggalMulai).toLocaleDateString('id-ID')}\n*Tanggal Selesai:* ${tanggalSelesai ? new Date(tanggalSelesai).toLocaleDateString('id-ID') : '-'}\n*Jam:* ${jamMulai}`;
+
+        const kendaraanNamaForMsg = pemesanan.mobil ? pemesanan.mobil.nama : pemesanan.mobilNama || '-';
 
         const pesanWaAdmin = `
         *Halo admin, saya ingin melakukan pemesanan*
         -----------------------------------
         *Nama:* ${nama}
-        *Jenis Mobil:* ${pemesanan.mobil.nama}
-        *Tanggal Mulai:* ${new Date(tanggalMulai).toLocaleDateString('id-ID')}
-        *Tanggal Selesai:* ${new Date(tanggalSelesai).toLocaleDateString('id-ID')}
-        *Jam:* ${jam}
+        *Jenis Mobil:* ${kendaraanNamaForMsg}
+        *Layanan:* ${layananLabel}
+        ${detailWaktu}
         *Lokasi Penjemputan:* ${lokasiPenjemputan}
         *Tujuan:* ${tujuan}
         *No WhatsApp:* ${noWa}
@@ -77,11 +136,13 @@ exports.updatePemesanan = async (req, res) => {
     const {
       nama,
       mobilId,
+            Layanan,
       tanggalMulai,
       tanggalSelesai,
       lokasiPenjemputan,
       tujuan,
-      jam,
+            jamMulai,
+            jamSelesai,
       noWa,
       email,
       catatan,
@@ -99,23 +160,34 @@ exports.updatePemesanan = async (req, res) => {
       });
     }
 
-    const updated = await prisma.pemesanan.update({
-      where: { id: parseInt(id) },
-      data: {
-        ...(nama && { nama }),
-        ...(mobilId && { mobilId: parseInt(mobilId) }),
-        ...(tanggalMulai && { tanggalMulai: new Date(tanggalMulai) }),
-        ...(tanggalSelesai && { tanggalSelesai: new Date(tanggalSelesai) }),
-        ...(lokasiPenjemputan && { lokasiPenjemputan }),
-        ...(tujuan && { tujuan }),
-        ...(jam && { jam }),
-        ...(noWa && { noWa }),
-        ...(email !== undefined && { email: email || null }),
-        ...(catatan !== undefined && { catatan: catatan || null }),
-        ...(status !== undefined && { status: status || null }),
-      },
-      include: { mobil: true },
-    });
+        // if mobilId provided, lookup mobil name to persist into mobilNama
+        let mobilNamaToSet;
+        if (mobilId) {
+            const mobilRec = await prisma.mobil.findUnique({ where: { id: parseInt(mobilId) } });
+            mobilNamaToSet = mobilRec ? mobilRec.nama : null;
+        }
+
+        const updated = await prisma.pemesanan.update({
+            where: { id: parseInt(id) },
+            data: Object.assign(
+                {},
+                nama ? { nama } : {},
+                mobilId ? { mobilId: parseInt(mobilId) } : {},
+                mobilId ? { mobilNama: mobilNamaToSet } : {},
+                Layanan ? { Layanan } : {},
+                tanggalMulai ? { tanggalMulai: new Date(tanggalMulai) } : {},
+                (tanggalSelesai !== undefined) ? { tanggalSelesai: tanggalSelesai ? new Date(tanggalSelesai) : null } : {},
+                lokasiPenjemputan ? { lokasiPenjemputan } : {},
+                tujuan ? { tujuan } : {},
+                (jamMulai !== undefined) ? { jamMulai: jamMulai || null } : {},
+                (jamSelesai !== undefined) ? { jamSelesai: jamSelesai || null } : {},
+                noWa ? { noWa } : {},
+                (email !== undefined) ? { email: email || null } : {},
+                (catatan !== undefined) ? { catatan: catatan || null } : {},
+                (status !== undefined) ? { status: status || null } : {}
+            ),
+            include: { mobil: true },
+        });
 
     return res.status(200).json({
       success: true,

@@ -58,13 +58,16 @@ model MobilFoto {
 model Pemesanan {
   id                  Int              @id @default(autoincrement())
   nama                String
-  mobilId             Int
-  mobil               Mobil            @relation(fields: [mobilId], references: [id])
+  mobilId             Int?
+  mobil               Mobil?           @relation(fields: [mobilId], references: [id], onDelete: SetNull)
+  mobilNama           String?
   tanggalMulai        DateTime
-  tanggalSelesai      DateTime
+  tanggalSelesai      DateTime?
   lokasiPenjemputan   String
   tujuan              String
-  jam                 String
+  Layanan             Paket           @default(LAINNYA)
+  jamMulai            String?
+  jamSelesai          String?
   noWa                String
   email               String?          // opsional
   perusahaan          String?          // opsional
@@ -82,3 +85,11 @@ enum StatusPemesanan {
   SELESAI
 }
 
+enum Paket {
+  SEWA_PER_JAM  // Rental durasi pendek (misal: 4 jam, 6 jam)
+  SEWA_HARIAN   // Rental 12 jam, 24 jam, atau harian penuh
+  CITY_TOUR     // Paket keliling kota (biasanya include mobil + sopir + bbm)
+  LUAR_KOTA     // Perjalanan keluar batas kota / antar kota
+  DROP_OFF      // Layanan pengantaran satu arah (termasuk antar jemput bandara)
+  LAINNYA       // Untuk kebutuhan kustom (mudik, pernikahan/wedding car, dll)
+}

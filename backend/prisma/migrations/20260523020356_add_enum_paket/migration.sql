@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "Paket" AS ENUM ('SEWA_PER_JAM', 'SEWA_HARIAN', 'CITY_TOUR', 'LUAR_KOTA', 'DROP_OFF', 'LAINNYA');
+
+-- AlterTable
+ALTER TABLE "Pemesanan" ADD COLUMN     "Layanan" "Paket" NOT NULL DEFAULT 'LAINNYA';
