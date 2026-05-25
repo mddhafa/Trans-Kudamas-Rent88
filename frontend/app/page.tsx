@@ -13,6 +13,12 @@ import {
   Star,
   Quote,
   ArrowRight,
+  Briefcase,
+  Users,
+  Calendar,
+  Route,
+  MapPinned,
+  Plane,
 } from "lucide-react";
 
 const API_URL =
@@ -79,18 +85,18 @@ export default function HomePage() {
   // ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       {/* HERO */}
-      <section className="hero-carousel-section relative w-full overflow-hidden">
+      <section className="hero-carousel-section relative w-full max-w-full overflow-hidden">
       <HeroCarousel />
       </section>
 
       <section
         id="tentang"
-        className="py-20 px-6 bg-white"
+        className="py-14 md:py-20 px-4 sm:px-6 bg-white overflow-hidden"
       >
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center">
             <motion.div
               className="relative"
               initial={{ opacity: 0, x: -50 }}
@@ -142,7 +148,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="sopir-section py-20 px-6 bg-gray-50">
+      <section className="sopir-section relative overflow-hidden py-14 md:py-20 px-4 sm:px-6 bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <motion.div
@@ -227,11 +233,11 @@ export default function HomePage() {
             >
               {/* Ambient Glow */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-[500px] h-[500px] rounded-full bg-gold/10 blur-3xl" />
+                <div className="w-[260px] h-[260px] md:w-[500px] md:h-[500px] rounded-full bg-gold/10 blur-3xl" />
               </div>
 
               {/* Main Wrapper */}
-              <div className="relative z-10 w-full max-w-[560px] pt-4 md:pt-6 pb-10 md:pb-16">
+              <div className="relative z-10 w-full max-w-[560px] overflow-visible pt-4 md:pt-6 pb-10 md:pb-16">
                 {/* Background Card */}
                 <div className="absolute inset-x-0 top-14 bottom-10 rounded-[40px] border border-border/50 bg-gradient-to-br from-[#F8F8F8] to-[#ECECEC] shadow-[0_25px_70px_rgba(0,0,0,0.08)]" />
 
@@ -256,7 +262,7 @@ export default function HomePage() {
 
                 {/* Floating Card */}
                 <motion.div
-                  className="absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-0 bottom-0 md:bottom-5 z-30 rounded-[28px] md:rounded-[34px] bg-white px-5 md:px-6 py-4 md:py-5 shadow-[0_20px_45px_rgba(0,0,0,0.12)] w-[90%] md:w-auto"
+                  className="absolute left-1/2 -translate-x-1/2 md:translate-x-0 md:left-0 bottom-0 md:bottom-5 z-30 rounded-[28px] md:rounded-[34px] bg-white px-5 md:px-6 py-4 md:py-5 shadow-[0_20px_45px_rgba(0,0,0,0.12)] w-[calc(100%-2rem)] max-w-[360px] md:w-auto"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -269,52 +275,13 @@ export default function HomePage() {
                     Sopir Profesional
                   </p>
 
-                  <p className="text-2xl md:text-3xl leading-[1.2] font-semibold tracking-tight text-primary">
+                  <p className="text-3xl md:text-3xl leading-[1.2] font-semibold tracking-tight text-primary">
                     Pelayanan Aman & Nyaman
                   </p>
                 </motion.div>
               </div>
             </motion.div>
           </div>
-        </div>
-      </section>
-
-      {/* FEATURES */}
-      <section className="py-20 px-6 bg-gray-100">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-8">
-          {[
-            {
-              icon: Shield,
-              title: "Sopir Profesional",
-              desc: "Berlisensi dan berpengalaman",
-            },
-            {
-              icon: Award,
-              title: "Armada Premium",
-              desc: "Selalu terawat dan bersih",
-            },
-            {
-              icon: Clock,
-              title: "Tepat Waktu",
-              desc: "Siap melayani 24 jam",
-            },
-          ].map((item, idx) => (
-            <motion.div
-              key={idx}
-              whileHover={{ y: -5 }}
-              className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm"
-            >
-              <item.icon className="w-10 h-10 text-yellow-500 mb-6" />
-
-              <h3 className="text-2xl font-semibold mb-3 text-gray-900">
-                {item.title}
-              </h3>
-
-              <p className="text-gray-600">
-                {item.desc}
-              </p>
-            </motion.div>
-          ))}
         </div>
       </section>
 
@@ -348,6 +315,84 @@ export default function HomePage() {
           </div>
 
           <MobilCarouselAPI />
+        </div>
+      </section>
+
+      {/* LAYANAN KAMI */}
+      <section className="services-section py-14 md:py-20 px-4 sm:px-6 bg-gray-100 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            className="text-center mb-10 md:mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-3xl md:text-4xl lg:text-5xl tracking-tight mb-4 text-primary">
+              Layanan Kami
+            </h2>
+
+            <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
+              Solusi transportasi untuk berbagai kebutuhan perjalanan
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+            {[
+              {
+                icon: Briefcase,
+                title: "Perjalanan Bisnis",
+                desc: "Transportasi untuk meeting, kunjungan kerja, dan kebutuhan operasional perusahaan",
+              },
+              {
+                icon: Users,
+                title: "Perjalanan Keluarga",
+                desc: "Layanan untuk liburan keluarga, acara pribadi, dan kebutuhan mobilitas harian",
+              },
+              {
+                icon: Calendar,
+                title: "Transportasi Acara",
+                desc: "Armada untuk pernikahan, gathering, seminar, dan perjalanan rombongan",
+              },
+              {
+                icon: Plane,
+                title: "Antar-Jemput Bandara",
+                desc: "Penjemputan dan pengantaran bandara dengan jadwal yang lebih terencana",
+              },
+              {
+                icon: Clock,
+                title: "Sewa Harian",
+                desc: "Layanan kendaraan dengan sopir untuk kebutuhan transportasi dalam satu hari",
+              },
+              {
+                icon: Route,
+                title: "Perjalanan Luar Kota",
+                desc: "Perjalanan antar kota di Pulau Jawa dengan sopir berpengalaman dan armada nyaman",
+              },
+            ].map((service, idx) => (
+              <motion.div
+                key={idx}
+                whileHover={{
+                  y: -8,
+                  boxShadow: "0 20px 40px rgba(201, 166, 104, 0.15)",
+                }}
+                transition={{ duration: 0.3 }}
+                className="bg-white border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm group"
+              >
+                <div className="w-14 h-14 rounded-xl bg-gold/10 flex items-center justify-center mb-6">
+                  <service.icon className="w-7 h-7 text-gold" />
+                </div>
+
+                <h3 className="text-xl md:text-2xl font-semibold mb-3 text-gray-900 tracking-tight">
+                  {service.title}
+                </h3>
+
+                <p className="text-sm md:text-base text-gray-600 leading-relaxed">
+                  {service.desc}
+                </p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
