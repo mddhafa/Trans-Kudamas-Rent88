@@ -291,3 +291,20 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1) !important;
 }
 
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+main {
+  max-width: 100%;
+  overflow-x: hidden;
+}
