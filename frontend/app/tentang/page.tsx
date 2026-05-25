@@ -202,7 +202,7 @@ export default function AboutPage() {
             "Semarang",
             "Yogyakarta",
             "Surabaya",
-            "Dan Lain-lain",
+            "Dan Kota Lainnya",
           ].map((city, index) => (
             <div
               key={index}
