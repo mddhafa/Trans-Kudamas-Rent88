@@ -25,96 +25,113 @@ export function Navbar() {
 
       let isDark = false;
 
-      const heroSection = document.querySelector(
-        ".hero-carousel-section"
-      ) as HTMLElement;
+      if (pathname === "/") {
+        const heroSection = document.querySelector(
+          ".hero-carousel-section"
+        ) as HTMLElement;
 
-      const fleetSection = document.querySelector(
-        ".fleet-section"
-      ) as HTMLElement;
+        const fleetSection = document.querySelector(
+          ".fleet-section"
+        ) as HTMLElement;
 
-      const bookingHeader = document.querySelector(
-        ".booking-header-section"
-      ) as HTMLElement;
-
-      const carsHeader = document.querySelector(
-        ".cars-header-section"
-      ) as HTMLElement;
-
-      const aboutHeader = document.querySelector(
-        ".about-header-section"
-      ) as HTMLElement;
-
-      const contactHeader = document.querySelector(
-        ".contact-header-section"
-      ) as HTMLElement;
-
-      if (heroSection && scrollY < heroSection.offsetHeight) {
-        isDark = true;
-      } else if (
-        fleetSection &&
-        scrollY >= fleetSection.offsetTop - navbarHeight &&
-        scrollY <
-          fleetSection.offsetTop +
-            fleetSection.offsetHeight -
-            navbarHeight
-      ) {
-        isDark = true;
+        if (heroSection && scrollY < heroSection.offsetHeight) {
+          isDark = true;
+        } else if (
+          fleetSection &&
+          scrollY >= fleetSection.offsetTop - navbarHeight &&
+          scrollY <
+            fleetSection.offsetTop +
+              fleetSection.offsetHeight -
+              navbarHeight
+        ) {
+          isDark = true;
+        }
       }
 
-      if (
-        (bookingHeader &&
-          scrollY < bookingHeader.offsetHeight) ||
-        (carsHeader &&
-          scrollY < carsHeader.offsetHeight) ||
-        (aboutHeader &&
-          scrollY < aboutHeader.offsetHeight) ||
-        (contactHeader &&
-          scrollY < contactHeader.offsetHeight)
-      ) {
-        isDark = true;
+      if (pathname === "/armada") {
+        const carsHeader = document.querySelector(
+          ".cars-header-section"
+        ) as HTMLElement;
+
+        isDark = !!(carsHeader && scrollY < carsHeader.offsetHeight);
+      }
+
+      if (pathname.startsWith("/booking/")) {
+        const bookingHeader = document.querySelector(
+          ".booking-header-section"
+        ) as HTMLElement;
+
+        isDark = !!(bookingHeader && scrollY < bookingHeader.offsetHeight);
+      }
+
+      if (pathname === "/tentang") {
+        const aboutHeader = document.querySelector(
+          ".about-header-section"
+        ) as HTMLElement;
+
+        isDark = !!(aboutHeader && scrollY < aboutHeader.offsetHeight);
+      }
+
+      if (pathname === "/kontak") {
+        const contactHeader = document.querySelector(
+          ".contact-header-section"
+        ) as HTMLElement;
+
+        isDark = !!(contactHeader && scrollY < contactHeader.offsetHeight);
       }
 
       setIsDarkSection(isDark);
     };
 
     window.addEventListener("scroll", handleScroll);
-
     handleScroll();
 
-    return () =>
-      window.removeEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [pathname]);
 
-  const isActive = (path: string) =>
-    pathname === path;
+  const isActive = (path: string) => pathname === path;
 
   const getNavbarStyles = () => {
     if (isDarkSection) {
       return {
         bg: isScrolled
-          ? "bg-[#0f172acc] backdrop-blur-xl border-b border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.25)]"
+          ? "bg-primary/20 backdrop-blur-lg border-b border-white/10 shadow-lg"
           : "bg-transparent",
-        text: "text-white/85 hover:text-[#d4af37]",
-        active: "text-[#d4af37]",
+        text: "text-white/90 hover:text-gold",
+        active: "text-gold",
         logoShadow: true,
+        mobileButton: "text-white",
+        mobileMenu:
+          "bg-primary/20 backdrop-blur-xl border border-white/10 shadow-lg",
+        mobileText: "text-white/85 hover:bg-white/10 hover:text-gold",
+        mobileActive: "bg-gold/15 text-gold",
       };
     }
 
     if (isScrolled) {
       return {
-        bg: "bg-white/75 backdrop-blur-xl border-b border-black/5 shadow-sm",
-        text: "text-gray-700 hover:text-[#d4af37]",
-        active: "text-[#d4af37]",
+        bg: "bg-white/20 backdrop-blur-lg border-b border-border/20 shadow-sm",
+        text: "text-foreground/70 hover:text-gold",
+        active: "text-gold",
         logoShadow: false,
+        mobileButton: "text-foreground",
+        mobileMenu:
+          "bg-white/80 backdrop-blur-xl border border-border/20 shadow-lg",
+        mobileText: "text-foreground/70 hover:bg-black/5 hover:text-gold",
+        mobileActive: "bg-gold/10 text-gold",
       };
     }
 
     return {
       bg: "bg-transparent",
-      text: "text-gray-700 hover:text-[#d4af37]",
-      active: "text-[#d4af37]",
+      text: "text-foreground/70 hover:text-gold",
+      active: "text-gold",
       logoShadow: false,
+      mobileButton: "text-foreground",
+      mobileMenu:
+        "bg-white/80 backdrop-blur-xl border border-border/20 shadow-lg",
+      mobileText: "text-foreground/70 hover:bg-black/5 hover:text-gold",
+      mobileActive: "bg-gold/10 text-gold",
     };
   };
 
@@ -144,9 +161,7 @@ export function Navbar() {
       className={`fixed top-0 left-0 right-0 z-[9999] transition-all duration-500 ${navStyles.bg}`}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-
         <div className="flex items-center justify-between h-20">
-
           {/* Logo */}
           <Link
             href="/"
@@ -163,7 +178,7 @@ export function Navbar() {
               alt="AGIL RENT"
               className={`h-14 md:h-16 w-auto object-contain transition-all duration-300 ${
                 navStyles.logoShadow
-                  ? "drop-shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
+                  ? "drop-shadow-[0_2px_10px_rgba(0,0,0,0.4)]"
                   : ""
               }`}
             />
@@ -171,7 +186,6 @@ export function Navbar() {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-10">
-
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -185,7 +199,7 @@ export function Navbar() {
                 {item.name}
 
                 <span
-                  className={`absolute -bottom-1 left-0 h-[2px] bg-[#d4af37] transition-all duration-300 ${
+                  className={`absolute -bottom-1 left-0 h-0.5 bg-gold transition-all duration-300 ${
                     isActive(item.path)
                       ? "w-full"
                       : "w-0 group-hover:w-full"
@@ -197,16 +211,9 @@ export function Navbar() {
 
           {/* Mobile Button */}
           <button
-            onClick={() =>
-              setIsMobileMenuOpen(
-                !isMobileMenuOpen
-              )
-            }
-            className={`md:hidden transition-colors duration-300 ${
-              isDarkSection
-                ? "text-white"
-                : "text-gray-700"
-            }`}
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className={`md:hidden transition-colors duration-300 ${navStyles.mobileButton}`}
+            aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? (
               <X className="w-6 h-6" />
@@ -224,21 +231,18 @@ export function Navbar() {
               : "max-h-0 opacity-0"
           }`}
         >
-          <div className="flex flex-col gap-2 pt-4 bg-white/10 backdrop-blur-xl rounded-2xl border border-white/10 p-3">
-
+          <div
+            className={`flex flex-col gap-2 pt-4 rounded-2xl p-3 ${navStyles.mobileMenu}`}
+          >
             {navItems.map((item) => (
               <Link
                 key={item.path}
                 href={item.path}
-                onClick={() =>
-                  setIsMobileMenuOpen(false)
-                }
+                onClick={() => setIsMobileMenuOpen(false)}
                 className={`px-4 py-3 rounded-xl text-sm transition-all duration-300 ${
                   isActive(item.path)
-                    ? "bg-[#d4af37]/15 text-[#d4af37]"
-                    : isDarkSection
-                    ? "text-white/80 hover:bg-white/10"
-                    : "text-gray-700 hover:bg-black/5"
+                    ? navStyles.mobileActive
+                    : navStyles.mobileText
                 }`}
               >
                 {item.name}
