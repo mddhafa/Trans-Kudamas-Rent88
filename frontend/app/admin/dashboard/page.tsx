@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { Sidebar } from "@/src/components/SideBar";
 import {
-  ArrowLeft,
   Calendar,
   Car,
   LogOut,
@@ -93,13 +91,19 @@ interface Pemesanan {
   } | null;
 }
 
-const bookingData = [
-  { id: "jan-2026", month: "Jan", bookings: 45 },
-  { id: "feb-2026", month: "Feb", bookings: 52 },
-  { id: "mar-2026", month: "Mar", bookings: 61 },
-  { id: "apr-2026", month: "Apr", bookings: 58 },
-  { id: "mei-2026", month: "Mei", bookings: 67 },
-  { id: "jun-2026", month: "Jun", bookings: 73 },
+const monthLabels = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "Mei",
+  "Jun",
+  "Jul",
+  "Agu",
+  "Sep",
+  "Okt",
+  "Nov",
+  "Des",
 ];
 
 const recentReviews: ReviewItem[] = [
@@ -124,30 +128,89 @@ function StatCard({ title, value, icon: Icon, iconColor }: StatCardProps) {
     <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
       <div
         className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl"
-        style={{ color: iconColor, backgroundColor: `${iconColor}15` }}
+        style={{
+          color: iconColor,
+          backgroundColor: `${iconColor}15`,
+        }}
       >
         <Icon className="h-5 w-5" />
       </div>
+
       <p className="text-sm text-[#64748b]">{title}</p>
-      <p className="mt-2 text-3xl font-semibold text-[#1e3a5f]">{value}</p>
+      <p className="mt-2 text-3xl font-semibold text-[#1e3a5f]">
+        {value}
+      </p>
     </div>
   );
 }
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+
   const [token, setToken] = useState<string | null>(null);
   const [profile, setProfile] = useState<AdminProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState("dashboard");
+
   const [mobilList, setMobilList] = useState<FeaturedCar[]>([]);
   const [mobilLoading, setMobilLoading] = useState(true);
+
   const [pemesananList, setPemesananList] = useState<Pemesanan[]>([]);
   const [pemesananLoading, setPemesananLoading] = useState(true);
-  const [contactSettings, setContactSettings] = useState<ContactSettings>(DEFAULT_CONTACT_SETTINGS);
+
+  const [contactSettings, setContactSettings] =
+    useState<ContactSettings>(DEFAULT_CONTACT_SETTINGS);
   const [contactSaving, setContactSaving] = useState(false);
   const [contactNotice, setContactNotice] = useState<string | null>(null);
+
   const catalogRef = useRef<HTMLDivElement | null>(null);
+
+  const bookingChartData = useMemo(() => {
+    const now = new Date();
+
+    const lastSixMonths = Array.from({ length: 6 }).map((_, index) => {
+      const date = new Date(
+        now.getFullYear(),
+        now.getMonth() - (5 - index),
+        1
+      );
+
+      return {
+        id: `${date.getFullYear()}-${date.getMonth()}`,
+        month: monthLabels[date.getMonth()],
+        year: date.getFullYear(),
+        monthIndex: date.getMonth(),
+        bookings: 0,
+      };
+    });
+
+    pemesananList.forEach((item) => {
+      const sourceDate = item.createdAt || item.tanggalMulai;
+
+      if (!sourceDate) return;
+
+      const bookingDate = new Date(sourceDate);
+
+      if (Number.isNaN(bookingDate.getTime())) return;
+
+      const targetMonth = lastSixMonths.find(
+        (month) =>
+          month.year === bookingDate.getFullYear() &&
+          month.monthIndex === bookingDate.getMonth()
+      );
+
+      if (targetMonth) {
+        targetMonth.bookings += 1;
+      }
+    });
+
+    return lastSixMonths;
+  }, [pemesananList]);
+
+  const maxBookings = Math.max(
+    1,
+    ...bookingChartData.map((item) => item.bookings)
+  );
 
   useEffect(() => {
     const storedToken = window.localStorage.getItem("admin_token");
@@ -217,53 +280,51 @@ export default function AdminDashboardPage() {
     };
 
     fetchMobilList();
-
-    
   }, []);
 
   useEffect(() => {
-  const fetchPemesananList = async () => {
-    if (!token) return;
+    const fetchPemesananList = async () => {
+      if (!token) return;
 
-    setPemesananLoading(true);
+      setPemesananLoading(true);
 
-    try {
-      const response = await fetch(`${API_URL}/admin/pemesanan`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      try {
+        const response = await fetch(`${API_URL}/admin/pemesanan`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (!response.ok || !result?.success) {
-        return;
+        if (!response.ok || !result?.success) {
+          return;
+        }
+
+        const items = (result.data || []) as Pemesanan[];
+
+        items.sort((left, right) => {
+          const leftDate = new Date(
+            left.createdAt || left.tanggalMulai
+          ).getTime();
+
+          const rightDate = new Date(
+            right.createdAt || right.tanggalMulai
+          ).getTime();
+
+          return rightDate - leftDate;
+        });
+
+        setPemesananList(items);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setPemesananLoading(false);
       }
+    };
 
-      const items = (result.data || []) as Pemesanan[];
-
-      items.sort((left, right) => {
-        const leftDate = new Date(
-          left.createdAt || left.tanggalMulai
-        ).getTime();
-
-        const rightDate = new Date(
-          right.createdAt || right.tanggalMulai
-        ).getTime();
-
-        return rightDate - leftDate;
-      });
-
-      setPemesananList(items);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setPemesananLoading(false);
-    }
-  };
-
-  fetchPemesananList();
-}, [token]);
+    fetchPemesananList();
+  }, [token]);
 
   useEffect(() => {
     const loadContactSettings = async () => {
@@ -277,8 +338,6 @@ export default function AdminDashboardPage() {
 
     loadContactSettings();
   }, []);
-
-  const maxBookings = Math.max(...bookingData.map((item) => item.bookings));
 
   const handleLogout = () => {
     window.localStorage.removeItem("admin_token");
@@ -306,6 +365,7 @@ export default function AdminDashboardPage() {
     if (!container) return;
 
     const scrollAmount = Math.min(container.clientWidth * 0.8, 520);
+
     container.scrollBy({
       left: direction === "left" ? -scrollAmount : scrollAmount,
       behavior: "smooth",
@@ -313,12 +373,21 @@ export default function AdminDashboardPage() {
   };
 
   const recentBookingItems = pemesananList.slice(0, 3).map((item) => {
-    const nama = item.nama || (item.email ? item.email.split("@")[0] : "Customer");
+    const nama =
+      item.nama || (item.email ? item.email.split("@")[0] : "Customer");
+
     const mulai = item.tanggalMulai ? new Date(item.tanggalMulai) : null;
-    const selesai = item.tanggalSelesai ? new Date(item.tanggalSelesai) : null;
+    const selesai = item.tanggalSelesai
+      ? new Date(item.tanggalSelesai)
+      : null;
+
     const formatDate = (d: Date | null) =>
       d && !Number.isNaN(d.getTime())
-        ? d.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" })
+        ? d.toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })
         : null;
 
     const dateRange = `${formatDate(mulai) || "-"}${
@@ -333,7 +402,7 @@ export default function AdminDashboardPage() {
       status: item.status || "PENDING",
       phone: item.noWa || "-",
       pickup: item.lokasiPenjemputan || "-",
-    } as unknown as BookingItem & { phone?: string; pickup?: string };
+    } as BookingItem & { phone?: string; pickup?: string };
   });
 
   const statusLabel = (status: string) => {
@@ -367,7 +436,10 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleContactChange = (field: keyof ContactSettings, value: string) => {
+  const handleContactChange = (
+    field: keyof ContactSettings,
+    value: string
+  ) => {
     setContactSettings((previous) => ({
       ...previous,
       [field]: value,
@@ -413,13 +485,17 @@ export default function AdminDashboardPage() {
                   <ShieldCheck className="h-3.5 w-3.5" />
                   Admin dashboard
                 </div>
+
                 <h1 className="text-3xl font-semibold text-[#1e3a5f] sm:text-4xl">
                   Dashboard Overview
                 </h1>
+
                 <p className="text-sm leading-6 text-[#64748b]">
                   {loading
                     ? "Memuat profil admin..."
-                    : `Selamat datang kembali, ${profile?.username || "admin"}.`}
+                    : `Selamat datang kembali, ${
+                        profile?.username || "admin"
+                      }.`}
                 </p>
               </div>
 
@@ -436,20 +512,51 @@ export default function AdminDashboardPage() {
             </div>
           </motion.header>
 
-          <section id="overview" className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <StatCard title="Total Booking" value={pemesananLoading ? "..." : String(pemesananList.length)} icon={Calendar} iconColor="#1e3a5f" />
-            <StatCard title="Total Mobil" value={mobilLoading ? "..." : String(mobilList.length)} icon={Car} iconColor="#d4af37" />
-            <StatCard title="Total Ulasan" value="156" icon={MessageSquare} iconColor="#3b82f6" />
+          <section
+            id="overview"
+            className="grid grid-cols-1 gap-4 md:grid-cols-3"
+          >
+            <StatCard
+              title="Total Booking"
+              value={
+                pemesananLoading ? "..." : String(pemesananList.length)
+              }
+              icon={Calendar}
+              iconColor="#1e3a5f"
+            />
+
+            <StatCard
+              title="Total Mobil"
+              value={mobilLoading ? "..." : String(mobilList.length)}
+              icon={Car}
+              iconColor="#d4af37"
+            />
+
+            <StatCard
+              title="Total Ulasan"
+              value="156"
+              icon={MessageSquare}
+              iconColor="#3b82f6"
+            />
           </section>
 
-          <section id="katalog" className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur">
+          <section
+            id="katalog"
+            className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur"
+          >
             <div className="mb-4 flex flex-wrap items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-[#1e3a5f]">Katalog Mobil</h2>
+                <h2 className="text-xl font-semibold text-[#1e3a5f]">
+                  Katalog Mobil
+                </h2>
+
                 <p className="text-sm text-[#64748b]">
-                  {mobilLoading ? "Memuat data mobil..." : `${mobilList.length} mobil dari database`}
+                  {mobilLoading
+                    ? "Memuat data mobil..."
+                    : `${mobilList.length} mobil dari database`}
                 </p>
               </div>
+
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -458,6 +565,7 @@ export default function AdminDashboardPage() {
                 >
                   Prev
                 </button>
+
                 <button
                   type="button"
                   onClick={() => scrollCatalog("right")}
@@ -486,6 +594,7 @@ export default function AdminDashboardPage() {
                       <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#1e3a5f] text-white">
                         <Car className="h-5 w-5" />
                       </div>
+
                       <div className="h-5 w-2/3 animate-pulse rounded bg-[#dbe6f3]" />
                       <div className="mt-3 h-4 w-full animate-pulse rounded bg-[#e8eef6]" />
                       <div className="mt-2 h-4 w-5/6 animate-pulse rounded bg-[#e8eef6]" />
@@ -500,7 +609,11 @@ export default function AdminDashboardPage() {
                   >
                     <div className="h-28 bg-[#dbe6f3] md:h-32">
                       <img
-                        src={car.imageUrl ? `${API_URL}/${car.imageUrl}` : "/file.svg"}
+                        src={
+                          car.imageUrl
+                            ? `${API_URL}/${car.imageUrl}`
+                            : "/file.svg"
+                        }
                         alt={car.name}
                         className="h-full w-full object-cover"
                       />
@@ -510,44 +623,73 @@ export default function AdminDashboardPage() {
                       <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#1e3a5f] text-white">
                         <Car className="h-5 w-5" />
                       </div>
+
                       <h3 className="text-lg font-semibold text-[#1e3a5f]">
                         {car.name}
                       </h3>
+
                       <p className="mt-3 text-sm leading-6 text-[#64748b]">
                         {car.description}
                       </p>
                     </div>
-                    
                   </div>
                 ))
               )}
             </div>
           </section>
 
-          <section id="booking" className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <section
+            id="booking"
+            className="grid grid-cols-1 gap-4 lg:grid-cols-2"
+          >
             <div className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur">
-              <h2 className="mb-4 text-xl font-semibold text-[#1e3a5f]">
-                Aktivitas Booking
-              </h2>
-              <div className="flex h-[250px] items-end gap-3 rounded-2xl bg-[#f8f9fb] p-4 ring-1 ring-[#d8e1ee]/50">
-                {bookingData.map((item) => {
-                  const height = Math.max((item.bookings / maxBookings) * 100, 18);
+              <div className="mb-4 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-xl font-semibold text-[#1e3a5f]">
+                    Aktivitas Booking
+                  </h2>
 
-                  return (
-                    <div key={item.id} className="flex-1">
-                      <div className="flex h-[190px] items-end justify-center">
-                        <div
-                          className="w-full max-w-[44px] rounded-t-xl bg-[#1e3a5f] shadow-sm transition-transform duration-300 hover:scale-y-105"
-                          style={{ height: `${height}%` }}
-                          title={`${item.month}: ${item.bookings} booking`}
-                        />
+                  <p className="mt-1 text-sm text-[#64748b]">
+                    Data pemesanan 6 bulan terakhir
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex h-[250px] items-end gap-3 rounded-2xl bg-[#f8f9fb] p-4 ring-1 ring-[#d8e1ee]/50">
+                {pemesananLoading ? (
+                  <div className="flex h-full w-full items-center justify-center text-sm text-[#64748b]">
+                    Memuat data booking...
+                  </div>
+                ) : pemesananList.length === 0 ? (
+                  <div className="flex h-full w-full items-center justify-center text-sm text-[#64748b]">
+                    Belum ada data booking.
+                  </div>
+                ) : (
+                  bookingChartData.map((item) => {
+                    const height = Math.max(
+                      (item.bookings / maxBookings) * 100,
+                      item.bookings > 0 ? 18 : 4
+                    );
+
+                    return (
+                      <div key={item.id} className="flex-1">
+                        <div className="flex h-[190px] items-end justify-center">
+                          <div
+                            className="w-full max-w-[44px] rounded-t-xl bg-[#1e3a5f] shadow-sm transition-transform duration-300 hover:scale-y-105"
+                            style={{
+                              height: `${height}%`,
+                            }}
+                            title={`${item.month}: ${item.bookings} booking`}
+                          />
+                        </div>
+
+                        <p className="mt-3 text-center text-xs text-[#64748b]">
+                          {item.month}
+                        </p>
                       </div>
-                      <p className="mt-3 text-center text-xs text-[#64748b]">
-                        {item.month}
-                      </p>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </div>
             </div>
 
@@ -555,9 +697,13 @@ export default function AdminDashboardPage() {
               <h2 className="mb-4 text-xl font-semibold text-[#1e3a5f]">
                 Booking Terbaru
               </h2>
+
               <p className="mb-3 text-sm text-[#64748b]">
-                {pemesananLoading ? "Memuat data pemesanan..." : `${pemesananList.length} pemesanan dari database`}
+                {pemesananLoading
+                  ? "Memuat data pemesanan..."
+                  : `${pemesananList.length} pemesanan dari database`}
               </p>
+
               <div className="space-y-3">
                 {recentBookingItems.map((booking: any) => (
                   <div
@@ -565,15 +711,28 @@ export default function AdminDashboardPage() {
                     className="flex flex-col gap-2 rounded-2xl bg-[#f8f9fb] p-3 ring-1 ring-[#d8e1ee]/50 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="min-w-0">
-                      <p className="text-[#1e3a5f] truncate font-medium">{booking.customer}</p>
-                      <p className="text-sm text-[#64748b] truncate">{booking.car}</p>
-                      <p className="mt-1 text-xs text-[#94a3b8]">{booking.dateRange}</p>
-                      <p className="mt-1 text-xs text-[#64748b]">{booking.pickup} • {booking.phone}</p>
+                      <p className="text-[#1e3a5f] truncate font-medium">
+                        {booking.customer}
+                      </p>
+
+                      <p className="text-sm text-[#64748b] truncate">
+                        {booking.car}
+                      </p>
+
+                      <p className="mt-1 text-xs text-[#94a3b8]">
+                        {booking.dateRange}
+                      </p>
+
+                      <p className="mt-1 text-xs text-[#64748b]">
+                        {booking.pickup} • {booking.phone}
+                      </p>
                     </div>
 
                     <div className="mt-2 flex items-center gap-3 text-right sm:mt-0">
                       <span
-                        className={`inline-block rounded-full px-3 py-1 text-xs ${statusClass(booking.status)}`}
+                        className={`inline-block rounded-full px-3 py-1 text-xs ${statusClass(
+                          booking.status
+                        )}`}
                       >
                         {statusLabel(booking.status)}
                       </span>
@@ -587,6 +746,7 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
                 ))}
+
                 {!pemesananLoading && pemesananList.length === 0 ? (
                   <div className="rounded-2xl bg-[#f8f9fb] p-4 text-sm text-[#64748b] ring-1 ring-[#d8e1ee]/50">
                     Belum ada data pemesanan di database.
@@ -596,16 +756,23 @@ export default function AdminDashboardPage() {
             </div>
           </section>
 
-          <section id="ulasan" className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur">
+          <section
+            id="ulasan"
+            className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur"
+          >
             <h2 className="mb-4 text-xl font-semibold text-[#1e3a5f]">
               Ulasan Terbaru
             </h2>
 
             <div className="space-y-4">
               {recentReviews.map((review) => (
-                <div key={review.id} className="rounded-2xl bg-[#f8f9fb] p-4 ring-1 ring-[#d8e1ee]/50">
+                <div
+                  key={review.id}
+                  className="rounded-2xl bg-[#f8f9fb] p-4 ring-1 ring-[#d8e1ee]/50"
+                >
                   <div className="mb-2 flex items-center justify-between gap-4">
                     <p className="text-[#1e3a5f]">{review.customer}</p>
+
                     <div className="flex gap-1">
                       {Array.from({ length: review.rating }).map((_, i) => (
                         <span
@@ -617,21 +784,38 @@ export default function AdminDashboardPage() {
                       ))}
                     </div>
                   </div>
-                  <p className="text-sm text-[#64748b]">{review.comment}</p>
-                  <p className="mt-2 text-xs text-[#94a3b8]">{review.date}</p>
+
+                  <p className="text-sm text-[#64748b]">
+                    {review.comment}
+                  </p>
+
+                  <p className="mt-2 text-xs text-[#94a3b8]">
+                    {review.date}
+                  </p>
                 </div>
               ))}
             </div>
           </section>
 
-          <section id="pengaturan" className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur">
-            <h2 className="mb-4 text-xl font-semibold text-[#1e3a5f]">Pengaturan</h2>
+          <section
+            id="pengaturan"
+            className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur"
+          >
+            <h2 className="mb-4 text-xl font-semibold text-[#1e3a5f]">
+              Pengaturan
+            </h2>
+
             <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
               <div className="space-y-4 rounded-2xl bg-[#f8f9fb] p-5 ring-1 ring-[#d8e1ee]/50">
                 <div>
-                  <p className="font-medium text-[#1e3a5f]">Akun admin aktif</p>
+                  <p className="font-medium text-[#1e3a5f]">
+                    Akun admin aktif
+                  </p>
+
                   <p className="text-sm text-[#64748b]">
-                    {loading ? "Memuat data akun..." : profile?.username || "admin"}
+                    {loading
+                      ? "Memuat data akun..."
+                      : profile?.username || "admin"}
                   </p>
                 </div>
 
@@ -647,8 +831,13 @@ export default function AdminDashboardPage() {
 
               <div className="space-y-4 rounded-2xl bg-[#f8f9fb] p-5 ring-1 ring-[#d8e1ee]/50">
                 <div>
-                  <p className="font-medium text-[#1e3a5f]">Kontak Publik</p>
-                  <p className="text-sm text-[#64748b]">Nomor ini dipakai di footer dan halaman kontak.</p>
+                  <p className="font-medium text-[#1e3a5f]">
+                    Kontak Publik
+                  </p>
+
+                  <p className="text-sm text-[#64748b]">
+                    Nomor ini dipakai di footer dan halaman kontak.
+                  </p>
                 </div>
 
                 <label className="block text-sm text-[#526176]">
@@ -656,7 +845,9 @@ export default function AdminDashboardPage() {
                   <input
                     type="text"
                     value={contactSettings.phone}
-                    onChange={(event) => handleContactChange("phone", event.target.value)}
+                    onChange={(event) =>
+                      handleContactChange("phone", event.target.value)
+                    }
                     className="mt-2 w-full rounded-xl border border-[#d8e1ee] bg-white px-4 py-3 text-[#1e3a5f] outline-none ring-0 focus:border-[#1e3a5f]"
                   />
                 </label>
@@ -666,7 +857,12 @@ export default function AdminDashboardPage() {
                   <input
                     type="text"
                     value={contactSettings.whatsappNumber}
-                    onChange={(event) => handleContactChange("whatsappNumber", event.target.value)}
+                    onChange={(event) =>
+                      handleContactChange(
+                        "whatsappNumber",
+                        event.target.value
+                      )
+                    }
                     className="mt-2 w-full rounded-xl border border-[#d8e1ee] bg-white px-4 py-3 text-[#1e3a5f] outline-none ring-0 focus:border-[#1e3a5f]"
                   />
                 </label>
@@ -676,7 +872,9 @@ export default function AdminDashboardPage() {
                   <input
                     type="email"
                     value={contactSettings.email}
-                    onChange={(event) => handleContactChange("email", event.target.value)}
+                    onChange={(event) =>
+                      handleContactChange("email", event.target.value)
+                    }
                     className="mt-2 w-full rounded-xl border border-[#d8e1ee] bg-white px-4 py-3 text-[#1e3a5f] outline-none ring-0 focus:border-[#1e3a5f]"
                   />
                 </label>
@@ -690,8 +888,11 @@ export default function AdminDashboardPage() {
                   >
                     {contactSaving ? "Menyimpan..." : "Simpan Kontak"}
                   </button>
+
                   {contactNotice ? (
-                    <p className="text-sm text-[#526176]">{contactNotice}</p>
+                    <p className="text-sm text-[#526176]">
+                      {contactNotice}
+                    </p>
                   ) : null}
                 </div>
               </div>
