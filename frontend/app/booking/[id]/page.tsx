@@ -279,11 +279,10 @@ export default function BookingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#edf2f8]">
-      {/* Header Section */}
-      <div className="bg-gradient-to-r from-[#1e3a5f] to-[#2a4d73] text-white py-16 px-6">
+    <div className="min-h-screen bg-background">
+      <div className="booking-header-section bg-gradient-to-r from-primary to-primary/90 text-white pt-20 pb-10 px-6">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl tracking-tight mb-3 font-bold">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl tracking-tight mb-3">
             Form Pemesanan
           </h1>
           <p className="text-white/90 text-lg max-w-2xl">
