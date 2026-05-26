@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { Users, Wind, UserCheck, Briefcase, Loader } from "lucide-react";
+import { FileText, Wind, UserCheck, Briefcase, Loader } from "lucide-react";
 import { motion } from "framer-motion";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -11,6 +11,7 @@ type CategoryFilter = 'all' | 'passenger' | 'bus';
 interface Car {
   id: number;
   nama: string;
+  deskripsi: string;
   kapasitas: number;
   image: string;
   category?: CategoryFilter;
@@ -52,11 +53,12 @@ export default function CarsPage() {
           return {
             id: car.id,
             nama: car.nama,
+            deskripsi: car.deskripsi || "",
             kapasitas: car.kapasitas,
-            image: car.fotos?.[0]?.url || '/placeholder-car.png',
+            image: car.fotos?.[0]?.url || "/placeholder-car.png",
             category,
             kategori: car.kategori,
-            fotos: car.fotos || []
+            fotos: car.fotos || [],
           };
         });
         
@@ -174,33 +176,41 @@ export default function CarsPage() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 whileHover={{ y: -6, transition: { duration: 0.3 } }}
               >
-                  <div className="relative h-48 md:h-56 lg:h-64 bg-gradient-to-br from-muted to-background overflow-hidden">
-                  {(() => {
-                    const img = car.image || '';
-                    let src = '/placeholder-car.png';
-                    if (img) {
-                      if (img.startsWith('http')) src = img;
-                      else if (img.startsWith('/')) src = `${API_URL}${img}`;
-                      else src = `${API_URL}/${img}`;
-                    }
+                  <div className="relative aspect-[4/3] bg-gradient-to-br from-muted to-background overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center p-6">
+                      {(() => {
+                        const img = car.image || "";
+                        let src = "/placeholder-car.png";
 
-                    return (
-                      <img
-                        src={src}
-                        alt={car.nama}
-                        className="w-full h-full object-cover drop-shadow-sm"
-                      />
-                    );
-                  })()}
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gold via-gold/60 to-transparent"></div>
-                </div>
+                        if (img) {
+                          if (img.startsWith("http")) src = img;
+                          else if (img.startsWith("/")) src = `${API_URL}${img}`;
+                          else src = `${API_URL}/${img}`;
+                        }
+
+                        return (
+                          <img
+                            src={src}
+                            alt={car.nama}
+                            className="w-full h-auto object-contain drop-shadow-lg"
+                          />
+                        );
+                      })()}
+                    </div>
+
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-gold via-gold/60 to-transparent"></div>
+                  </div>
 
                 <div className="p-6 space-y-4">
                   <div>
-                    <h3 className="text-lg tracking-tight text-primary mb-1">{car.nama}</h3>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <Users className="w-4 h-4 text-gold" />
-                      <span className="text-sm">{car.kapasitas} Penumpang</span>
+                    <h3 className="text-lg tracking-tight text-primary mb-2">
+                      {car.nama}
+                    </h3>
+                    <div className="flex items-start gap-2 text-muted-foreground">
+                      <FileText className="w-4 h-4 text-gold flex-shrink-0 mt-0.5" />
+                      <p className="text-sm line-clamp-2 leading-relaxed">
+                        {car.deskripsi}
+                      </p>
                     </div>
                   </div>
 
