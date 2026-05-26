@@ -109,12 +109,12 @@ function CatalogContent() {
 
 	return (
 		<main className="min-h-screen w-full overflow-x-hidden bg-[#edf2f8] text-[#1e3a5f]">
-			<div className="flex min-h-screen w-full flex-col gap-4 px-3 py-3 lg:flex-row lg:px-4 lg:py-4">
-				<aside className="w-full shrink-0 lg:w-auto">
-					<Sidebar currentPage={currentPage} onNavigate={handleNavigate} />
+			<div className="min-h-screen w-full px-3 py-3 lg:px-4 lg:py-4">
+				<aside>
+				<Sidebar currentPage={currentPage} onNavigate={handleNavigate} />
 				</aside>
 
-				<div className="min-w-0 flex-1 space-y-5 lg:pt-0">
+				<div className="min-w-0 space-y-5 lg:ml-[17.5rem]">
 					<div className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur">
 						<div className="mb-4 flex items-center justify-between">
 							<div>

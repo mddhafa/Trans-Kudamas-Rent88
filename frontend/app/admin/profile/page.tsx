@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Mail, User, LogOut, ArrowLeft, Camera, Calendar, ShieldCheck } from "lucide-react";
+import {
+  User,
+  LogOut,
+  ArrowLeft,
+  Calendar,
+  ShieldCheck,
+} from "lucide-react";
 import { Sidebar } from "@/src/components/SideBar";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -22,6 +28,7 @@ type SnackbarState = {
 
 export default function ProfilePage() {
   const router = useRouter();
+
   const [currentPage, setCurrentPage] = useState("profile");
   const [admin, setAdmin] = useState<AdminProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,15 +39,17 @@ export default function ProfilePage() {
     message: "",
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
   useEffect(() => {
     fetchProfile();
   }, []);
 
   const fetchProfile = async () => {
     try {
-      const token = localStorage.getItem("admin_token");
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("admin_token")
+          : null;
+
       if (!token) {
         router.push("/admin/login");
         return;
@@ -67,9 +76,18 @@ export default function ProfilePage() {
   };
 
   const showSnackbar = (type: "success" | "error", message: string) => {
-    setSnackbar({ show: true, type, message });
+    setSnackbar({
+      show: true,
+      type,
+      message,
+    });
+
     setTimeout(() => {
-      setSnackbar({ show: false, type: "success", message: "" });
+      setSnackbar({
+        show: false,
+        type: "success",
+        message: "",
+      });
     }, 3000);
   };
 
@@ -78,20 +96,34 @@ export default function ProfilePage() {
     router.push("/admin/login");
   };
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "-";
+
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
+
   if (isLoading) {
     return (
       <main className="min-h-screen w-full overflow-x-hidden bg-[#edf2f8] text-[#1e3a5f]">
-        <div className="flex min-h-screen w-full flex-col gap-4 px-3 py-3 lg:flex-row lg:px-4 lg:py-4">
-          <aside className="w-full shrink-0 lg:w-auto">
+        <div className="min-h-screen w-full px-3 py-3 lg:px-4 lg:py-4">
+          <aside>
             <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
           </aside>
 
-          <div className="flex items-center justify-center flex-1">
-            <div className="text-center">
-              <div className="inline-block">
-                <div className="w-16 h-16 border-4 border-[#1e3a5f] border-t-[#d4af37] rounded-full animate-spin" />
+          <div className="min-w-0 space-y-5 lg:ml-[17.5rem]">
+            <div className="flex min-h-[calc(100vh-2rem)] items-center justify-center rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur">
+              <div className="text-center">
+                <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-[#1e3a5f] border-t-[#d4af37]" />
+
+                <p className="mt-4 text-sm font-medium text-[#1e3a5f]">
+                  Loading profile...
+                </p>
               </div>
-              <p className="mt-4 text-[#1e3a5f]">Loading profile...</p>
             </div>
           </div>
         </div>
@@ -101,22 +133,31 @@ export default function ProfilePage() {
 
   return (
     <main className="min-h-screen w-full overflow-x-hidden bg-[#edf2f8] text-[#1e3a5f]">
-      <div className="flex min-h-screen w-full flex-col gap-4 px-3 py-3 lg:flex-row lg:px-4 lg:py-4">
-        <aside className="w-full shrink-0 lg:w-auto">
+      <div className="min-h-screen w-full px-3 py-3 lg:px-4 lg:py-4">
+        <aside>
           <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
         </aside>
 
-        <div className="min-w-0 flex-1 space-y-5">
+        <div className="min-w-0 space-y-5 lg:ml-[17.5rem]">
           {/* Snackbar */}
           {snackbar.show && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className={`rounded-2xl p-4 shadow-lg ${
+              initial={{
+                opacity: 0,
+                y: -10,
+              }}
+              animate={{
+                opacity: 1,
+                y: 0,
+              }}
+              exit={{
+                opacity: 0,
+                y: -10,
+              }}
+              className={`rounded-2xl p-4 text-sm shadow-lg ring-1 ${
                 snackbar.type === "success"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
+                  ? "bg-green-50 text-green-700 ring-green-200"
+                  : "bg-red-50 text-red-700 ring-red-200"
               }`}
             >
               {snackbar.message}
@@ -125,115 +166,192 @@ export default function ProfilePage() {
 
           {/* Header */}
           <motion.header
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur"
+            initial={{
+              opacity: 0,
+              y: 16,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: 0.6,
+            }}
+            className="rounded-3xl bg-white/92 p-4 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur sm:p-6"
           >
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 border-b border-[#e2e8f0] pb-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <button
+                  type="button"
                   onClick={() => router.back()}
-                  className="p-2 rounded-lg hover:bg-[#edf2f8] transition-colors"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#f8fafc] text-[#1e3a5f] ring-1 ring-[#d8e1ee] transition-colors hover:bg-white"
+                  aria-label="Kembali"
                 >
-                  <ArrowLeft size={24} className="text-[#1e3a5f]" />
+                  <ArrowLeft size={20} />
                 </button>
-                <h1 className="text-3xl font-bold text-[#1e3a5f]">My Profile</h1>
+
+                <div>
+                  <h1 className="text-2xl font-semibold tracking-tight text-[#1e3a5f] sm:text-3xl">
+                    Profile Admin
+                  </h1>
+
+                  <p className="mt-1 text-sm text-[#64748b]">
+                    Informasi akun administrator yang sedang aktif.
+                  </p>
+                </div>
               </div>
             </div>
           </motion.header>
 
-          {/* Profile Info Card */}
+          {/* Profile Hero Card */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="rounded-3xl bg-gradient-to-br from-[#1e3a5f] to-[#2d4a6f] p-8 shadow-[0_12px_40px_rgba(30,58,95,0.18)] ring-1 ring-white/10"
+            initial={{
+              opacity: 0,
+              y: 16,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: 0.6,
+              delay: 0.1,
+            }}
+            className="overflow-hidden rounded-3xl bg-gradient-to-br from-[#1e3a5f] to-[#2d4a6f] p-5 shadow-[0_12px_40px_rgba(30,58,95,0.18)] ring-1 ring-white/10 sm:p-8"
           >
-            <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="flex flex-col items-center gap-6 sm:flex-row">
               <div className="relative">
-                <div className="w-24 h-24 rounded-full bg-[#d4af37] flex items-center justify-center">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-[#d4af37] shadow-[0_12px_30px_rgba(0,0,0,0.18)]">
                   <User size={48} className="text-[#1e3a5f]" />
                 </div>
-                {/* <button className="absolute bottom-0 right-0 p-2 rounded-full bg-[#d4af37] hover:bg-[#e6c547] transition-colors shadow-lg">
-                  <Camera size={16} className="text-[#1e3a5f]" />
-                </button> */}
               </div>
+
               <div className="flex-1 text-center sm:text-left">
-                <h2 className="text-2xl font-bold text-white">{admin?.username}</h2>
-                <p className="text-white/40 text-xs mt-2">Administrator</p>
-                <p className="text-white/60 text-xs mt-3">
-                  Bergabung: {admin?.createdAt ? new Date(admin.createdAt).toLocaleDateString("id-ID") : "-"}
+                <p className="mb-2 inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-[#d4af37] ring-1 ring-white/10">
+                  Administrator
+                </p>
+
+                <h2 className="text-2xl font-bold text-white">
+                  {admin?.username || "Admin"}
+                </h2>
+
+                <p className="mt-3 text-sm text-white/70">
+                  Bergabung sejak{" "}
+                  {admin?.createdAt
+                    ? new Date(admin.createdAt).toLocaleDateString("id-ID", {
+                        day: "2-digit",
+                        month: "long",
+                        year: "numeric",
+                      })
+                    : "-"}
                 </p>
               </div>
             </div>
           </motion.div>
 
-          {/* Profile Information Section */}
+          {/* Profile Information */}
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="rounded-3xl bg-white/92 p-8 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur space-y-6"
+            initial={{
+              opacity: 0,
+              y: 16,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: 0.6,
+              delay: 0.2,
+            }}
+            className="rounded-3xl bg-white/92 p-4 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur sm:p-6"
           >
-            <div>
-              <h3 className="text-lg font-semibold text-[#1e3a5f] mb-6">Informasi Profile</h3>
+            <div className="mb-6 border-b border-[#e2e8f0] pb-5">
+              <h3 className="text-lg font-semibold text-[#1e3a5f]">
+                Informasi Profile
+              </h3>
 
-              <div className="space-y-4">
-                {/* Username */}
-                <div>
-                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">
-                    <User size={16} className="inline mr-2" />
-                    Username
-                  </label>
-                  <div className="px-4 py-3 rounded-2xl bg-[#f5f8fc] border-2 border-[#d8e1ee] text-[#1e3a5f]">
-                    {admin?.username || "-"}
-                  </div>
+              <p className="mt-1 text-sm text-[#64748b]">
+                Data akun admin yang digunakan untuk mengakses dashboard.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              {/* Username */}
+              <div className="rounded-2xl bg-[#f8fafc] p-4 ring-1 ring-[#d8e1ee]/60">
+                <label className="flex items-center gap-2 text-sm font-medium text-[#1e3a5f]">
+                  <User size={16} className="text-[#d4af37]" />
+                  Username
+                </label>
+
+                <div className="mt-3 rounded-xl bg-white px-4 py-3 text-sm font-medium text-[#1e3a5f] ring-1 ring-[#d8e1ee]">
+                  {admin?.username || "-"}
                 </div>
+              </div>
 
-                {/* Member Since */}
-                <div>
-                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">
-                    <Calendar size={16} className="inline mr-2" />
-                    Bergabung Sejak
-                  </label>
-                  <div className="px-4 py-3 rounded-2xl bg-[#f5f8fc] border-2 border-[#d8e1ee] text-[#1e3a5f]">
-                    {admin?.createdAt ? new Date(admin.createdAt).toLocaleDateString("id-ID", { 
-                      weekday: "long", 
-                      year: "numeric", 
-                      month: "long", 
-                      day: "numeric" 
-                    }) : "-"}
-                  </div>
+              {/* Member Since */}
+              <div className="rounded-2xl bg-[#f8fafc] p-4 ring-1 ring-[#d8e1ee]/60">
+                <label className="flex items-center gap-2 text-sm font-medium text-[#1e3a5f]">
+                  <Calendar size={16} className="text-[#d4af37]" />
+                  Bergabung Sejak
+                </label>
+
+                <div className="mt-3 rounded-xl bg-white px-4 py-3 text-sm font-medium leading-6 text-[#1e3a5f] ring-1 ring-[#d8e1ee]">
+                  {formatDate(admin?.createdAt)}
                 </div>
+              </div>
 
-                {/* Role */}
-                <div>
-                  <label className="block text-sm font-medium text-[#1e3a5f] mb-2">
-                    <ShieldCheck size={16} className="inline mr-2" />
-                    Role
-                  </label>
-                  <div className="px-4 py-3 rounded-2xl bg-[#f5f8fc] border-2 border-[#d8e1ee] text-[#1e3a5f]">
-                    Administrator
-                  </div>
+              {/* Role */}
+              <div className="rounded-2xl bg-[#f8fafc] p-4 ring-1 ring-[#d8e1ee]/60">
+                <label className="flex items-center gap-2 text-sm font-medium text-[#1e3a5f]">
+                  <ShieldCheck size={16} className="text-[#d4af37]" />
+                  Role
+                </label>
+
+                <div className="mt-3 rounded-xl bg-white px-4 py-3 text-sm font-medium text-[#1e3a5f] ring-1 ring-[#d8e1ee]">
+                  Administrator
                 </div>
               </div>
             </div>
           </motion.div>
 
           {/* Logout Button */}
-          <motion.button
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            onClick={handleLogout}
-            className="w-full rounded-3xl bg-red-600 hover:bg-red-700 text-white p-4 font-semibold transition-colors flex items-center justify-center gap-2 shadow-[0_12px_40px_rgba(220,38,38,0.15)]"
+          <motion.div
+            initial={{
+              opacity: 0,
+              y: 16,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            transition={{
+              duration: 0.6,
+              delay: 0.3,
+            }}
+            className="rounded-3xl bg-white/92 p-4 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur sm:p-6"
           >
-            <LogOut size={20} />
-            Logout
-          </motion.button>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-[#1e3a5f]">
+                  Keluar dari Dashboard
+                </h3>
 
-          {/* Bottom Spacing */}
+                <p className="mt-1 text-sm text-[#64748b]">
+                  Akhiri sesi admin dan kembali ke halaman login.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(220,38,38,0.15)] transition-colors hover:bg-red-700 sm:w-auto"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </div>
+          </motion.div>
+
           <div className="pb-8" />
         </div>
       </div>

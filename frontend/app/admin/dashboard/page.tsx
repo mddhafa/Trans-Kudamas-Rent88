@@ -466,12 +466,12 @@ export default function AdminDashboardPage() {
 
   return (
     <main className="min-h-screen w-full overflow-x-hidden bg-[#edf2f8] text-[#1e3a5f]">
-      <div className="flex min-h-screen w-full flex-col gap-4 px-3 py-3 lg:flex-row lg:px-4 lg:py-4">
-        <aside className="w-full shrink-0 lg:w-auto">
+      <div className="min-h-screen w-full px-3 py-3 lg:px-4 lg:py-4">
+        <aside>
           <Sidebar currentPage={currentPage} onNavigate={handleNavigate} />
         </aside>
 
-        <div className="min-w-0 flex-1 space-y-5 lg:pt-0">
+        <div className="min-w-0 space-y-5 lg:ml-[17.5rem]">
           <motion.header
             id="dashboard"
             initial={{ opacity: 0, y: 16 }}
@@ -481,11 +481,6 @@ export default function AdminDashboardPage() {
           >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="space-y-1">
-                <div className="inline-flex items-center gap-2 rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-medium uppercase tracking-[0.22em] text-[#1e3a5f]">
-                  <ShieldCheck className="h-3.5 w-3.5" />
-                  Admin dashboard
-                </div>
-
                 <h1 className="text-3xl font-semibold text-[#1e3a5f] sm:text-4xl">
                   Dashboard Overview
                 </h1>

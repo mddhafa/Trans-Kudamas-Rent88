@@ -41,22 +41,38 @@ export default function PemesananPage() {
 
   useEffect(() => {
     fetchPemesanan();
+
     const handleUpdate = () => fetchPemesanan();
+
     window.addEventListener("pemesanan-updated", handleUpdate);
-    return () => window.removeEventListener("pemesanan-updated", handleUpdate);
+
+    return () => {
+      window.removeEventListener("pemesanan-updated", handleUpdate);
+    };
   }, []);
 
   const fetchPemesanan = async () => {
     try {
       setLoading(true);
-      const token = typeof window !== "undefined" ? window.localStorage.getItem("admin_token") : null;
-      if (!token) throw new Error("Token tidak ditemukan");
+      setError(null);
+
+      const token =
+        typeof window !== "undefined"
+          ? window.localStorage.getItem("admin_token")
+          : null;
+
+      if (!token) {
+        throw new Error("Token tidak ditemukan");
+      }
 
       const res = await fetch(`${API_URL}/admin/pemesanan`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const body = await res.json();
+
       if (!res.ok) {
         if (res.status === 401) {
           window.localStorage.removeItem("admin_token");
@@ -67,12 +83,14 @@ export default function PemesananPage() {
       }
 
       if (body.success) {
-        const sorted = (body.data || []).sort((a: Pemesanan, b: Pemesanan) => 
-          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        const sorted = (body.data || []).sort(
+          (a: Pemesanan, b: Pemesanan) =>
+            new Date(b.updatedAt).getTime() -
+            new Date(a.updatedAt).getTime()
         );
+
         setPemesanan(sorted);
       }
-      setError(null);
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan");
     } finally {
@@ -86,87 +104,210 @@ export default function PemesananPage() {
       DIKONFIRMASI: "bg-green-100 text-green-800",
       DITOLAK: "bg-red-100 text-red-800",
       DIBATALKAN: "bg-red-100 text-red-800",
-      SELESAI: "bg-blue-100 text-blue-800"
+      SELESAI: "bg-blue-100 text-blue-800",
     };
+
     return colors[status] || "bg-gray-100 text-gray-800";
+  };
+
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      PENDING: "Menunggu",
+      DIKONFIRMASI: "Dikonfirmasi",
+      DITOLAK: "Ditolak",
+      DIBATALKAN: "Dibatalkan",
+      SELESAI: "Selesai",
+    };
+
+    return labels[status] || status;
+  };
+
+  const getLayananLabel = (layanan: string) => {
+    const labels: Record<string, string> = {
+      SEWA_HARIAN: "Sewa Harian",
+      SEWA_PER_JAM: "Sewa Per Jam",
+      CITY_TOUR: "City Tour",
+      LUAR_KOTA: "Luar Kota",
+      DROP_OFF: "Drop Off",
+      LAINNYA: "Lainnya",
+    };
+
+    return labels[layanan] || layanan;
   };
 
   const formatDate = (dateString?: string | null) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString("id-ID");
+
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   return (
     <main className="min-h-screen w-full overflow-x-hidden bg-[#edf2f8] text-[#1e3a5f]">
-      <div className="flex min-h-screen w-full flex-col gap-4 px-3 py-3 lg:flex-row lg:px-4 lg:py-4">
-        <aside className="w-full shrink-0 lg:w-auto">
+      <div className="min-h-screen w-full px-3 py-3 lg:px-4 lg:py-4">
+        <aside>
           <Sidebar currentPage={"pemesanan"} onNavigate={() => {}} />
         </aside>
 
-        <div className="min-w-0 flex-1 space-y-5 lg:pt-0">
-          <div className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur">
-            <div className="mb-6 flex items-center justify-between">
+        <div className="min-w-0 space-y-5 lg:ml-[17.5rem]">
+          <div className="rounded-3xl bg-white/92 p-4 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur sm:p-6">
+            {/* HEADER */}
+            <div className="mb-6 flex flex-col gap-4 border-b border-[#e2e8f0] pb-5 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="text-2xl font-semibold text-[#1e3a5f]">Daftar Pemesanan</h1>
-                <p className="text-sm text-[#64748b]">Kelola semua pemesanan mobil dari pelanggan</p>
+                <h1 className="text-2xl font-semibold tracking-tight text-[#1e3a5f]">
+                  Daftar Pemesanan
+                </h1>
+
+                <p className="mt-1 text-sm text-[#64748b]">
+                  Kelola semua pemesanan kendaraan yang masuk dari pelanggan.
+                </p>
               </div>
+
               <button
+                type="button"
                 onClick={() => fetchPemesanan()}
-                className="rounded-lg bg-[#1e3a5f]/10 px-3 py-1 text-sm text-[#1e3a5f] hover:bg-[#1e3a5f]/20"
+                className="inline-flex w-full items-center justify-center rounded-xl bg-[#1e3a5f] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#27466f] sm:w-auto"
               >
-                Refresh
+                Refresh Data
               </button>
             </div>
 
-            {error && <div className="rounded-lg bg-red-100 p-3 text-sm text-red-800 mb-4">{error}</div>}
+            {/* ERROR */}
+            {error && (
+              <div className="mb-4 rounded-xl bg-red-50 p-4 text-sm text-red-700 ring-1 ring-red-200">
+                {error}
+              </div>
+            )}
 
+            {/* CONTENT */}
             {loading ? (
-              <div className="text-center py-8 text-[#64748b]">Memuat data...</div>
+              <div className="rounded-2xl bg-[#f8fafc] p-8 text-center text-sm text-[#64748b] ring-1 ring-[#d8e1ee]/60">
+                Memuat data pemesanan...
+              </div>
             ) : pemesanan.length === 0 ? (
-              <div className="text-center py-8 text-[#64748b]">Belum ada pemesanan</div>
+              <div className="rounded-2xl bg-[#f8fafc] p-8 text-center text-sm text-[#64748b] ring-1 ring-[#d8e1ee]/60">
+                Belum ada data pemesanan.
+              </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-[#e6eef8] bg-[#f8fafc]">
-                      <th className="px-4 py-3 text-left font-semibold">ID</th>
-                      <th className="px-4 py-3 text-left font-semibold">Nama</th>
-                      <th className="px-4 py-3 text-left font-semibold">Mobil</th>
-                      <th className="px-4 py-3 text-left font-semibold">Layanan</th>
-                      <th className="px-4 py-3 text-left font-semibold">Tgl Mulai</th>
-                      <th className="px-4 py-3 text-left font-semibold">Tgl Selesai</th>
-                      <th className="px-4 py-3 text-left font-semibold">Penjemputan</th>
-                      <th className="px-4 py-3 text-left font-semibold">Status</th>
-                      <th className="px-4 py-3 text-left font-semibold">Aksi</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {pemesanan.map((p) => (
-                      <tr key={p.id} className="border-b border-[#e6eef8] hover:bg-[#f8fafc]/50">
-                        <td className="px-4 py-3">#{p.id}</td>
-                        <td className="px-4 py-3">{p.nama}</td>
-                        <td className="px-4 py-3">{p.mobil?.nama || "-"}</td>
-                        <td className="px-4 py-3">{p.Layanan}</td>
-                        <td className="px-4 py-3">{formatDate(p.tanggalMulai)}</td>
-                        <td className="px-4 py-3">{formatDate(p.tanggalSelesai)}</td>
-                        <td className="px-4 py-3 text-xs">{p.lokasiPenjemputan}</td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getStatusBadge(p.status)}`}>
-                            {p.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <Link
-                            href={`/admin/pemesanan/${p.id}`}
-                            className="text-[#1e3a5f] hover:underline text-xs font-medium"
-                          >
-                            Lihat Detail
-                          </Link>
-                        </td>
+              <div className="rounded-2xl bg-[#f8fafc] p-4 ring-1 ring-[#d8e1ee]/60">
+                <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold text-[#1e3a5f]">
+                      Data Pemesanan
+                    </h2>
+
+                    <p className="text-sm text-[#64748b]">
+                      Total {pemesanan.length} pemesanan ditemukan.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-[#e6eef8]">
+                  <table className="w-full min-w-[1080px] text-sm">
+                    <thead>
+                      <tr className="border-b border-[#e6eef8] bg-[#f8fafc]">
+                        <th className="px-4 py-3 text-left font-semibold text-[#1e3a5f]">
+                          ID
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold text-[#1e3a5f]">
+                          Nama
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold text-[#1e3a5f]">
+                          Mobil
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold text-[#1e3a5f]">
+                          Layanan
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold text-[#1e3a5f]">
+                          Tgl Mulai
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold text-[#1e3a5f]">
+                          Tgl Selesai
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold text-[#1e3a5f]">
+                          Penjemputan
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold text-[#1e3a5f]">
+                          Status
+                        </th>
+                        <th className="px-4 py-3 text-left font-semibold text-[#1e3a5f]">
+                          Aksi
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+
+                    <tbody>
+                      {pemesanan.map((item) => (
+                        <tr
+                          key={item.id}
+                          className="border-b border-[#e6eef8] transition-colors last:border-b-0 hover:bg-[#f8fafc]"
+                        >
+                          <td className="px-4 py-3 text-[#64748b]">
+                            #{item.id}
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <div>
+                              <p className="font-medium text-[#1e3a5f]">
+                                {item.nama}
+                              </p>
+
+                              <p className="mt-1 text-xs text-[#94a3b8]">
+                                {item.noWa}
+                              </p>
+                            </div>
+                          </td>
+
+                          <td className="px-4 py-3 text-[#64748b]">
+                            {item.mobil?.nama || "-"}
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <span className="inline-flex rounded-full bg-[#1e3a5f]/10 px-3 py-1 text-xs font-medium text-[#1e3a5f]">
+                              {getLayananLabel(item.Layanan)}
+                            </span>
+                          </td>
+
+                          <td className="px-4 py-3 text-xs text-[#64748b]">
+                            {formatDate(item.tanggalMulai)}
+                          </td>
+
+                          <td className="px-4 py-3 text-xs text-[#64748b]">
+                            {formatDate(item.tanggalSelesai)}
+                          </td>
+
+                          <td className="max-w-[220px] px-4 py-3 text-xs leading-5 text-[#64748b]">
+                            <span className="line-clamp-2">
+                              {item.lokasiPenjemputan || "-"}
+                            </span>
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <span
+                              className={`inline-flex rounded-full px-3 py-1 text-xs font-medium ${getStatusBadge(
+                                item.status
+                              )}`}
+                            >
+                              {getStatusLabel(item.status)}
+                            </span>
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <Link
+                              href={`/admin/pemesanan/${item.id}`}
+                              className="inline-flex rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-[#1e3a5f] ring-1 ring-[#d8e1ee] transition-colors hover:bg-[#f8fafc]"
+                            >
+                              Lihat Detail
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>

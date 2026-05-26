@@ -34,13 +34,20 @@ type Pemesanan = {
   updatedAt: string;
 };
 
+type StatusPemesanan =
+  | "PENDING"
+  | "DIKONFIRMASI"
+  | "DITOLAK"
+  | "DIBATALKAN"
+  | "SELESAI";
+
 export default function DetailPemesananPage() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
 
   const [pemesanan, setPemesanan] = useState<Pemesanan | null>(null);
-  const [status, setStatus] = useState<"PENDING" | "DIKONFIRMASI" | "DITOLAK" | "DIBATALKAN" | "SELESAI">("PENDING");
+  const [status, setStatus] = useState<StatusPemesanan>("PENDING");
   const [editMode, setEditMode] = useState(false);
   const [mobils, setMobils] = useState<Mobil[]>([]);
   const [editData, setEditData] = useState<any>(null);
@@ -51,18 +58,22 @@ export default function DetailPemesananPage() {
 
   useEffect(() => {
     if (!id) return;
+
     fetchPemesananDetail();
     fetchMobils();
   }, [id]);
 
   useEffect(() => {
     if (!pemesanan) return;
+
     setEditData({
       nama: pemesanan.nama,
       mobilId: pemesanan.mobilId ?? null,
       Layanan: pemesanan.Layanan,
       tanggalMulai: pemesanan.tanggalMulai?.split("T")[0] ?? "",
-      tanggalSelesai: pemesanan.tanggalSelesai ? pemesanan.tanggalSelesai.split("T")[0] : "",
+      tanggalSelesai: pemesanan.tanggalSelesai
+        ? pemesanan.tanggalSelesai.split("T")[0]
+        : "",
       jamMulai: pemesanan.jamMulai || "",
       jamSelesai: pemesanan.jamSelesai || "",
       lokasiPenjemputan: pemesanan.lokasiPenjemputan,
@@ -78,7 +89,10 @@ export default function DetailPemesananPage() {
     try {
       const res = await fetch(`${API_URL}/mobil`);
       const body = await res.json();
-      if (body.success) setMobils(body.data || []);
+
+      if (body.success) {
+        setMobils(body.data || []);
+      }
     } catch (err) {
       console.error(err);
     }
@@ -87,21 +101,33 @@ export default function DetailPemesananPage() {
   const fetchPemesananDetail = async () => {
     try {
       setLoading(true);
-      const token = typeof window !== "undefined" ? window.localStorage.getItem("admin_token") : null;
-      if (!token) throw new Error("Token tidak ditemukan");
+      setError(null);
+
+      const token =
+        typeof window !== "undefined"
+          ? window.localStorage.getItem("admin_token")
+          : null;
+
+      if (!token) {
+        throw new Error("Token tidak ditemukan");
+      }
 
       const res = await fetch(`${API_URL}/admin/pemesanan/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
-      if (!res.ok) throw new Error("Gagal mengambil detail pemesanan");
+      if (!res.ok) {
+        throw new Error("Gagal mengambil detail pemesanan");
+      }
 
       const body = await res.json();
+
       if (body.success) {
         setPemesanan(body.data);
         setStatus(body.data.status);
       }
-      setError(null);
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan");
     } finally {
@@ -111,13 +137,22 @@ export default function DetailPemesananPage() {
 
   const handleUpdateStatus = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (!pemesanan) return;
 
     try {
       setUpdating(true);
       setError(null);
-      const token = typeof window !== "undefined" ? window.localStorage.getItem("admin_token") : null;
-      if (!token) throw new Error("Token tidak ditemukan");
+      setSuccess(null);
+
+      const token =
+        typeof window !== "undefined"
+          ? window.localStorage.getItem("admin_token")
+          : null;
+
+      if (!token) {
+        throw new Error("Token tidak ditemukan");
+      }
 
       const res = await fetch(`${API_URL}/admin/pemesanan/${pemesanan.id}`, {
         method: "PUT",
@@ -134,8 +169,9 @@ export default function DetailPemesananPage() {
         throw new Error(body.message || `HTTP ${res.status}`);
       }
 
-      setSuccess("Status pemesanan berhasil diperbarui");
+      setSuccess("Status pemesanan berhasil diperbarui.");
       setPemesanan({ ...pemesanan, status });
+
       setTimeout(() => {
         router.push("/admin/pemesanan");
       }, 1500);
@@ -146,245 +182,346 @@ export default function DetailPemesananPage() {
     }
   };
 
+  const handleUpdatePemesanan = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!pemesanan || !editData) return;
+
+    try {
+      setUpdating(true);
+      setError(null);
+      setSuccess(null);
+
+      const token =
+        typeof window !== "undefined"
+          ? window.localStorage.getItem("admin_token")
+          : null;
+
+      if (!token) {
+        throw new Error("Token tidak ditemukan");
+      }
+
+      const payload: any = {
+        nama: editData.nama,
+        mobilId: editData.mobilId,
+        Layanan: editData.Layanan,
+        tanggalMulai: editData.tanggalMulai || undefined,
+        tanggalSelesai: editData.tanggalSelesai || undefined,
+        jamMulai: editData.jamMulai || undefined,
+        jamSelesai: editData.jamSelesai || undefined,
+        lokasiPenjemputan: editData.lokasiPenjemputan,
+        tujuan: editData.tujuan,
+        noWa: editData.noWa,
+        email: editData.email || undefined,
+        perusahaan: editData.perusahaan || undefined,
+        catatan: editData.catatan || undefined,
+      };
+
+      const res = await fetch(`${API_URL}/admin/pemesanan/${pemesanan.id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const body = await res.json();
+
+      if (!res.ok || !body.success) {
+        throw new Error(body.message || `HTTP ${res.status}`);
+      }
+
+      setSuccess("Pemesanan berhasil diperbarui.");
+      setPemesanan(body.data);
+      setEditMode(false);
+
+      setTimeout(() => {
+        router.push("/admin/pemesanan");
+      }, 1200);
+    } catch (err: any) {
+      setError(err.message || "Gagal menyimpan perubahan");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const formatDate = (dateString?: string | null) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString("id-ID");
+
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   const isHourlyRental = pemesanan?.Layanan === "SEWA_PER_JAM";
 
-  const getStatusColor = (s: string) => {
+  const getStatusBadge = (s: string) => {
     const colors: Record<string, string> = {
-      PENDING: "text-yellow-700",
-      DIKONFIRMASI: "text-green-700",
-      DITOLAK: "text-red-700",
-      DIBATALKAN: "text-red-700",
-      SELESAI: "text-blue-700"
+      PENDING: "bg-yellow-100 text-yellow-800",
+      DIKONFIRMASI: "bg-green-100 text-green-800",
+      DITOLAK: "bg-red-100 text-red-800",
+      DIBATALKAN: "bg-red-100 text-red-800",
+      SELESAI: "bg-blue-100 text-blue-800",
     };
-    return colors[s] || "text-gray-700";
+
+    return colors[s] || "bg-gray-100 text-gray-800";
   };
+
+  const getStatusLabel = (s: string) => {
+    const labels: Record<string, string> = {
+      PENDING: "Menunggu Konfirmasi",
+      DIKONFIRMASI: "Dikonfirmasi",
+      DITOLAK: "Ditolak",
+      DIBATALKAN: "Dibatalkan",
+      SELESAI: "Selesai",
+    };
+
+    return labels[s] || s;
+  };
+
+  const getLayananLabel = (layanan: string) => {
+    const labels: Record<string, string> = {
+      SEWA_HARIAN: "Sewa Harian",
+      SEWA_PER_JAM: "Sewa Per Jam",
+      CITY_TOUR: "City Tour",
+      LUAR_KOTA: "Luar Kota",
+      DROP_OFF: "Drop Off",
+      LAINNYA: "Lainnya",
+    };
+
+    return labels[layanan] || layanan;
+  };
+
+  const DetailCard = ({
+    label,
+    value,
+  }: {
+    label: string;
+    value?: string | number | null;
+  }) => (
+    <div className="rounded-2xl bg-[#f8fafc] p-4 ring-1 ring-[#d8e1ee]/60">
+      <label className="text-xs font-semibold uppercase tracking-[0.14em] text-[#64748b]">
+        {label}
+      </label>
+
+      <p className="mt-2 text-sm font-medium leading-6 text-[#1e3a5f] break-words">
+        {value || "-"}
+      </p>
+    </div>
+  );
+
+  const inputClass =
+    "mt-2 w-full rounded-xl border border-[#d8e1ee] bg-white px-4 py-3 text-sm text-[#1e3a5f] outline-none transition-colors placeholder:text-[#94a3b8] focus:border-[#1e3a5f]";
 
   return (
     <main className="min-h-screen w-full overflow-x-hidden bg-[#edf2f8] text-[#1e3a5f]">
-      <div className="flex min-h-screen w-full flex-col gap-4 px-3 py-3 lg:flex-row lg:px-4 lg:py-4">
-        <aside className="w-full shrink-0 lg:w-auto">
+      <div className="min-h-screen w-full px-3 py-3 lg:px-4 lg:py-4">
+        <aside>
           <Sidebar currentPage={"pemesanan"} onNavigate={() => {}} />
         </aside>
 
-        <div className="min-w-0 flex-1 space-y-5 lg:pt-0">
+        <div className="min-w-0 space-y-5 lg:ml-[17.5rem]">
           <Link
             href="/admin/pemesanan"
-            className="inline-flex items-center gap-2 text-sm text-[#1e3a5f] hover:underline"
+            className="inline-flex items-center gap-2 text-sm font-medium text-[#1e3a5f] hover:underline"
           >
-            ← Kembali
+            ← Kembali ke Daftar Pemesanan
           </Link>
 
-          <div className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur">
-            <div className="mb-6">
-              <h1 className="text-2xl font-semibold text-[#1e3a5f]">Detail Pemesanan</h1>
-              <p className="text-sm text-[#64748b]">ID: #{id}</p>
-            </div>
-            <div>
-              <button onClick={() => setEditMode((v) => !v)} className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#27466f] disabled:opacity-50">
+          <div className="rounded-3xl bg-white/92 p-4 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur sm:p-6">
+            {/* HEADER */}
+            <div className="mb-6 flex flex-col gap-4 border-b border-[#e2e8f0] pb-5 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight text-[#1e3a5f]">
+                  Detail Pemesanan
+                </h1>
+
+                <p className="mt-1 text-sm text-[#64748b]">
+                  ID Pemesanan: #{id}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setEditMode((value) => !value)}
+                className="inline-flex w-full items-center justify-center rounded-xl bg-[#1e3a5f] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#27466f] sm:w-auto"
+              >
                 {editMode ? "Batal Edit" : "Edit Pemesanan"}
-               </button>
+              </button>
             </div>
 
-            {error && <div className="rounded-lg bg-red-100 p-3 text-sm text-red-800 mb-4">{error}</div>}
-            {success && <div className="rounded-lg bg-green-100 p-3 text-sm text-green-800 mb-4">{success}</div>}
+            {error && (
+              <div className="mb-4 rounded-xl bg-red-50 p-4 text-sm text-red-700 ring-1 ring-red-200">
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="mb-4 rounded-xl bg-green-50 p-4 text-sm text-green-700 ring-1 ring-green-200">
+                {success}
+              </div>
+            )}
 
             {loading ? (
-              <div className="text-center py-8 text-[#64748b]">Memuat data...</div>
+              <div className="rounded-2xl bg-[#f8fafc] p-8 text-center text-sm text-[#64748b] ring-1 ring-[#d8e1ee]/60">
+                Memuat data pemesanan...
+              </div>
             ) : !pemesanan ? (
-              <div className="text-center py-8 text-[#64748b]">Pemesanan tidak ditemukan</div>
+              <div className="rounded-2xl bg-[#f8fafc] p-8 text-center text-sm text-[#64748b] ring-1 ring-[#d8e1ee]/60">
+                Pemesanan tidak ditemukan.
+              </div>
             ) : (
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                <div className="space-y-4">
-                  <div className="bg-[#f8fafc] rounded-lg p-4">
-                    <label className="text-xs font-semibold text-[#64748b] uppercase">Nama Pemesan</label>
-                    <p className="text-lg font-medium mt-1">{pemesanan.nama}</p>
-                  </div>
-
-                  <div className="bg-[#f8fafc] rounded-lg p-4">
-                    <div className="flex items-start justify-between">
+              <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+                {/* DETAIL LEFT */}
+                <div className="space-y-5">
+                  <div className="rounded-2xl bg-[#f8fafc] p-4 ring-1 ring-[#d8e1ee]/60 sm:p-5">
+                    <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <label className="text-xs font-semibold text-[#64748b] uppercase">Mobil</label>
-                        <p className="text-lg font-medium mt-1">{pemesanan.mobil?.nama || pemesanan.mobilNama || "-"}</p>
+                        <h2 className="text-lg font-semibold text-[#1e3a5f]">
+                          Informasi Pemesanan
+                        </h2>
+
+                        <p className="text-sm text-[#64748b]">
+                          Detail kendaraan, layanan, dan jadwal perjalanan.
+                        </p>
+                      </div>
+
+                      <span
+                        className={`inline-flex w-fit rounded-full px-3 py-1 text-xs font-medium ${getStatusBadge(
+                          pemesanan.status
+                        )}`}
+                      >
+                        {getStatusLabel(pemesanan.status)}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                      <DetailCard label="Nama Pemesan" value={pemesanan.nama} />
+                      <DetailCard
+                        label="Mobil"
+                        value={
+                          pemesanan.mobil?.nama || pemesanan.mobilNama || "-"
+                        }
+                      />
+                      <DetailCard
+                        label="Layanan"
+                        value={getLayananLabel(pemesanan.Layanan)}
+                      />
+                      <DetailCard
+                        label={isHourlyRental ? "Tanggal Sewa" : "Tanggal Mulai"}
+                        value={formatDate(pemesanan.tanggalMulai)}
+                      />
+                      <DetailCard
+                        label="Tanggal Selesai"
+                        value={formatDate(pemesanan.tanggalSelesai)}
+                      />
+                      <DetailCard
+                        label={isHourlyRental ? "Jam Mulai" : "Jam Penjemputan"}
+                        value={pemesanan.jamMulai || "-"}
+                      />
+
+                      {pemesanan.jamSelesai && (
+                        <DetailCard
+                          label="Jam Selesai"
+                          value={pemesanan.jamSelesai}
+                        />
+                      )}
+
+                      <DetailCard
+                        label="Dibuat Pada"
+                        value={formatDate(pemesanan.createdAt)}
+                      />
+
+                      <div className="md:col-span-2">
+                        <DetailCard
+                          label="Lokasi Penjemputan"
+                          value={pemesanan.lokasiPenjemputan}
+                        />
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <DetailCard label="Tujuan" value={pemesanan.tujuan} />
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-[#f8fafc] rounded-lg p-4">
-                    <label className="text-xs font-semibold text-[#64748b] uppercase">Layanan</label>
-                    <p className="text-lg font-medium mt-1">{pemesanan.Layanan}</p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-[#f8fafc] rounded-lg p-4">
-                      <label className="text-xs font-semibold text-[#64748b] uppercase">
-                        {isHourlyRental ? "Tanggal Sewa" : "Tanggal Mulai"}
-                      </label>
-                      <p className="text-sm font-medium mt-1">{formatDate(pemesanan.tanggalMulai)}</p>
-                    </div>
-                    <div className="bg-[#f8fafc] rounded-lg p-4">
-                      <label className="text-xs font-semibold text-[#64748b] uppercase">Tanggal Selesai</label>
-                      <p className="text-sm font-medium mt-1">{formatDate(pemesanan.tanggalSelesai)}</p>
-                    </div>
-                  </div>
-
-                  <div className="bg-[#f8fafc] rounded-lg p-4">
-                    <label className="text-xs font-semibold text-[#64748b] uppercase">
-                      {isHourlyRental ? "Jam Mulai" : "Jam Penjemputan"}
-                    </label>
-                    <p className="text-lg font-medium mt-1">{pemesanan.jamMulai || "-"}</p>
-                  </div>
-
-                  {pemesanan.jamSelesai && (
-                    <div className="bg-[#f8fafc] rounded-lg p-4">
-                      <label className="text-xs font-semibold text-[#64748b] uppercase">Jam Selesai</label>
-                      <p className="text-lg font-medium mt-1">{pemesanan.jamSelesai}</p>
-                    </div>
-                  )}
-
-                  <div className="bg-[#f8fafc] rounded-lg p-4">
-                    <label className="text-xs font-semibold text-[#64748b] uppercase">Lokasi Penjemputan</label>
-                    <p className="text-sm font-medium mt-1">{pemesanan.lokasiPenjemputan}</p>
-                  </div>
-
-                  <div className="bg-[#f8fafc] rounded-lg p-4">
-                    <label className="text-xs font-semibold text-[#64748b] uppercase">Tujuan</label>
-                    <p className="text-sm font-medium mt-1">{pemesanan.tujuan}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="bg-[#f8fafc] rounded-lg p-4">
-                    <label className="text-xs font-semibold text-[#64748b] uppercase">No. WhatsApp</label>
-                    <p className="text-lg font-medium mt-1 break-all">{pemesanan.noWa}</p>
-                    <a
-                      href={`https://wa.me/${pemesanan.noWa.replace(/[^\d]/g, '')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-2 inline-block text-sm text-[#1e3a5f] hover:underline"
-                    >
-                      Buka Chat WhatsApp →
-                    </a>
-                  </div>
-
-                  {pemesanan.email && (
-                    <div className="bg-[#f8fafc] rounded-lg p-4">
-                      <label className="text-xs font-semibold text-[#64748b] uppercase">Email</label>
-                      <p className="text-sm font-medium mt-1 break-all">{pemesanan.email}</p>
-                    </div>
-                  )}
-
-                  {pemesanan.perusahaan && (
-                    <div className="bg-[#f8fafc] rounded-lg p-4">
-                      <label className="text-xs font-semibold text-[#64748b] uppercase">Perusahaan</label>
-                      <p className="text-sm font-medium mt-1">{pemesanan.perusahaan}</p>
-                    </div>
-                  )}
-
-                  {pemesanan.catatan && (
-                    <div className="bg-[#f8fafc] rounded-lg p-4">
-                      <label className="text-xs font-semibold text-[#64748b] uppercase">Catatan</label>
-                      <p className="text-sm font-medium mt-1">{pemesanan.catatan}</p>
-                    </div>
-                  )}
-
-                  <div className="bg-[#f8fafc] rounded-lg p-4">
-                    <label className="text-xs font-semibold text-[#64748b] uppercase">Dibuat Pada</label>
-                    <p className="text-sm font-medium mt-1">{formatDate(pemesanan.createdAt)}</p>
-                  </div>
-
-                  <form onSubmit={handleUpdateStatus} className="bg-[#f8fafc] rounded-lg p-4 border-2 border-[#e6eef8]">
-                    <label className="text-xs font-semibold text-[#64748b] uppercase block mb-2">Update Status</label>
-                    <select
-                      value={status}
-                      onChange={(e) => setStatus(e.target.value as any)}
-                      className="w-full rounded-lg border border-[#e6eef8] bg-white px-3 py-2 text-sm mb-3"
-                    >
-                      <option value="PENDING">Menunggu Konfirmasi</option>
-                      <option value="DIKONFIRMASI">Dikonfirmasi</option>
-                      <option value="DITOLAK">Ditolak</option>
-                      <option value="DIBATALKAN">Dibatalkan</option>
-                      <option value="SELESAI">Selesai</option>
-                    </select>
-                    <button
-                      type="submit"
-                      disabled={updating}
-                      className="w-full rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-semibold text-white hover:bg-[#27466f] disabled:opacity-50"
-                    >
-                      {updating ? "Menyimpan..." : "Simpan Status"}
-                    </button>
-                  </form>
                   {editMode && editData && (
-                    <form onSubmit={async (e) => {
-                      e.preventDefault();
-                      try {
-                        setUpdating(true);
-                        setError(null);
-                        const token = typeof window !== "undefined" ? window.localStorage.getItem("admin_token") : null;
-                        if (!token) throw new Error("Token tidak ditemukan");
+                    <form
+                      onSubmit={handleUpdatePemesanan}
+                      className="rounded-2xl bg-[#f8fafc] p-4 ring-1 ring-[#d8e1ee]/60 sm:p-5"
+                    >
+                      <div className="mb-5">
+                        <h2 className="text-lg font-semibold text-[#1e3a5f]">
+                          Edit Pemesanan
+                        </h2>
 
-                        const payload: any = {
-                          nama: editData.nama,
-                          mobilId: editData.mobilId,
-                          Layanan: editData.Layanan,
-                          tanggalMulai: editData.tanggalMulai || undefined,
-                          tanggalSelesai: editData.tanggalSelesai || undefined,
-                          jamMulai: editData.jamMulai || undefined,
-                          jamSelesai: editData.jamSelesai || undefined,
-                          lokasiPenjemputan: editData.lokasiPenjemputan,
-                          tujuan: editData.tujuan,
-                          noWa: editData.noWa,
-                          email: editData.email || undefined,
-                          perusahaan: editData.perusahaan || undefined,
-                          catatan: editData.catatan || undefined,
-                        };
+                        <p className="mt-1 text-sm text-[#64748b]">
+                          Perbarui data pemesanan pelanggan.
+                        </p>
+                      </div>
 
-                        const res = await fetch(`${API_URL}/admin/pemesanan/${pemesanan.id}`, {
-                          method: "PUT",
-                          headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                          },
-                          body: JSON.stringify(payload),
-                        });
-
-                        const body = await res.json();
-                        if (!res.ok || !body.success) throw new Error(body.message || `HTTP ${res.status}`);
-
-                        setSuccess("Pemesanan berhasil diperbarui");
-                        setPemesanan(body.data);
-                        setEditMode(false);
-                        setTimeout(() => router.push('/admin/pemesanan'), 1200);
-                      } catch (err: any) {
-                        setError(err.message || "Gagal menyimpan perubahan");
-                      } finally {
-                        setUpdating(false);
-                      }
-                    }} className="bg-white p-6 rounded-lg border border-gray-200">
-                      <h3 className="text-base font-semibold mb-4">Edit Pemesanan</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div>
-                          <label className="text-xs font-semibold text-gray-600 uppercase">Nama Pemesan</label>
-                          <input className="mt-1 w-full px-3 py-2 border rounded-md" value={editData.nama} onChange={(e) => setEditData((d: any) => ({ ...d, nama: e.target.value }))} />
+                          <label className="text-sm font-medium text-[#1e3a5f]">
+                            Nama Pemesan
+                          </label>
+
+                          <input
+                            className={inputClass}
+                            value={editData.nama}
+                            onChange={(e) =>
+                              setEditData((data: any) => ({
+                                ...data,
+                                nama: e.target.value,
+                              }))
+                            }
+                          />
                         </div>
 
                         <div>
-                          <label className="text-xs font-semibold text-gray-600 uppercase">Mobil</label>
-                          <select className="mt-1 w-full px-3 py-2 border rounded-md" value={editData.mobilId ?? ""} onChange={(e) => setEditData((d: any) => ({ ...d, mobilId: e.target.value ? parseInt(e.target.value) : null }))}>
+                          <label className="text-sm font-medium text-[#1e3a5f]">
+                            Mobil
+                          </label>
+
+                          <select
+                            className={inputClass}
+                            value={editData.mobilId ?? ""}
+                            onChange={(e) =>
+                              setEditData((data: any) => ({
+                                ...data,
+                                mobilId: e.target.value
+                                  ? parseInt(e.target.value)
+                                  : null,
+                              }))
+                            }
+                          >
                             <option value="">-- Pilih Mobil --</option>
-                            {mobils.map((m) => (
-                              <option key={m.id} value={m.id}>{m.nama}</option>
+                            {mobils.map((item) => (
+                              <option key={item.id} value={item.id}>
+                                {item.nama}
+                              </option>
                             ))}
                           </select>
                         </div>
 
                         <div>
-                          <label className="text-xs font-semibold text-gray-600 uppercase">Layanan</label>
-                          <select className="mt-1 w-full px-3 py-2 border rounded-md" value={editData.Layanan} onChange={(e) => setEditData((d: any) => ({ ...d, Layanan: e.target.value }))}>
+                          <label className="text-sm font-medium text-[#1e3a5f]">
+                            Layanan
+                          </label>
+
+                          <select
+                            className={inputClass}
+                            value={editData.Layanan}
+                            onChange={(e) =>
+                              setEditData((data: any) => ({
+                                ...data,
+                                Layanan: e.target.value,
+                              }))
+                            }
+                          >
                             <option value="SEWA_HARIAN">Sewa Harian</option>
                             <option value="SEWA_PER_JAM">Sewa Per Jam</option>
                             <option value="CITY_TOUR">City Tour</option>
@@ -394,57 +531,270 @@ export default function DetailPemesananPage() {
                         </div>
 
                         <div>
-                          <label className="text-xs font-semibold text-gray-600 uppercase">No. WhatsApp</label>
-                          <input className="mt-1 w-full px-3 py-2 border rounded-md" value={editData.noWa} onChange={(e) => setEditData((d: any) => ({ ...d, noWa: e.target.value }))} />
+                          <label className="text-sm font-medium text-[#1e3a5f]">
+                            No. WhatsApp
+                          </label>
+
+                          <input
+                            className={inputClass}
+                            value={editData.noWa}
+                            onChange={(e) =>
+                              setEditData((data: any) => ({
+                                ...data,
+                                noWa: e.target.value,
+                              }))
+                            }
+                          />
                         </div>
 
                         <div>
-                          <label className="text-xs font-semibold text-gray-600 uppercase">Email</label>
-                          <input className="mt-1 w-full px-3 py-2 border rounded-md" value={editData.email} onChange={(e) => setEditData((d: any) => ({ ...d, email: e.target.value }))} />
+                          <label className="text-sm font-medium text-[#1e3a5f]">
+                            Email
+                          </label>
+
+                          <input
+                            className={inputClass}
+                            value={editData.email}
+                            onChange={(e) =>
+                              setEditData((data: any) => ({
+                                ...data,
+                                email: e.target.value,
+                              }))
+                            }
+                          />
                         </div>
 
                         <div>
-                          <label className="text-xs font-semibold text-gray-600 uppercase">Tanggal Mulai</label>
-                          <input type="date" className="mt-1 w-full px-3 py-2 border rounded-md" value={editData.tanggalMulai} onChange={(e) => setEditData((d: any) => ({ ...d, tanggalMulai: e.target.value }))} />
+                          <label className="text-sm font-medium text-[#1e3a5f]">
+                            Tanggal Mulai
+                          </label>
+
+                          <input
+                            type="date"
+                            className={inputClass}
+                            value={editData.tanggalMulai}
+                            onChange={(e) =>
+                              setEditData((data: any) => ({
+                                ...data,
+                                tanggalMulai: e.target.value,
+                              }))
+                            }
+                          />
                         </div>
 
                         <div>
-                          <label className="text-xs font-semibold text-gray-600 uppercase">Tanggal Selesai</label>
-                          <input type="date" className="mt-1 w-full px-3 py-2 border rounded-md" value={editData.tanggalSelesai} onChange={(e) => setEditData((d: any) => ({ ...d, tanggalSelesai: e.target.value }))} />
+                          <label className="text-sm font-medium text-[#1e3a5f]">
+                            Tanggal Selesai
+                          </label>
+
+                          <input
+                            type="date"
+                            className={inputClass}
+                            value={editData.tanggalSelesai}
+                            onChange={(e) =>
+                              setEditData((data: any) => ({
+                                ...data,
+                                tanggalSelesai: e.target.value,
+                              }))
+                            }
+                          />
                         </div>
 
                         <div>
-                          <label className="text-xs font-semibold text-gray-600 uppercase">Jam Mulai</label>
-                          <input type="time" className="mt-1 w-full px-3 py-2 border rounded-md" value={editData.jamMulai} onChange={(e) => setEditData((d: any) => ({ ...d, jamMulai: e.target.value }))} />
+                          <label className="text-sm font-medium text-[#1e3a5f]">
+                            Jam Mulai
+                          </label>
+
+                          <input
+                            type="time"
+                            className={inputClass}
+                            value={editData.jamMulai}
+                            onChange={(e) =>
+                              setEditData((data: any) => ({
+                                ...data,
+                                jamMulai: e.target.value,
+                              }))
+                            }
+                          />
                         </div>
 
                         <div>
-                          <label className="text-xs font-semibold text-gray-600 uppercase">Jam Selesai</label>
-                          <input type="time" className="mt-1 w-full px-3 py-2 border rounded-md" value={editData.jamSelesai} onChange={(e) => setEditData((d: any) => ({ ...d, jamSelesai: e.target.value }))} />
+                          <label className="text-sm font-medium text-[#1e3a5f]">
+                            Jam Selesai
+                          </label>
+
+                          <input
+                            type="time"
+                            className={inputClass}
+                            value={editData.jamSelesai}
+                            onChange={(e) =>
+                              setEditData((data: any) => ({
+                                ...data,
+                                jamSelesai: e.target.value,
+                              }))
+                            }
+                          />
                         </div>
 
                         <div className="md:col-span-2">
-                          <label className="text-xs font-semibold text-gray-600 uppercase">Lokasi Penjemputan</label>
-                          <input className="mt-1 w-full px-3 py-2 border rounded-md" value={editData.lokasiPenjemputan} onChange={(e) => setEditData((d: any) => ({ ...d, lokasiPenjemputan: e.target.value }))} />
+                          <label className="text-sm font-medium text-[#1e3a5f]">
+                            Lokasi Penjemputan
+                          </label>
+
+                          <input
+                            className={inputClass}
+                            value={editData.lokasiPenjemputan}
+                            onChange={(e) =>
+                              setEditData((data: any) => ({
+                                ...data,
+                                lokasiPenjemputan: e.target.value,
+                              }))
+                            }
+                          />
                         </div>
 
                         <div className="md:col-span-2">
-                          <label className="text-xs font-semibold text-gray-600 uppercase">Tujuan</label>
-                          <input className="mt-1 w-full px-3 py-2 border rounded-md" value={editData.tujuan} onChange={(e) => setEditData((d: any) => ({ ...d, tujuan: e.target.value }))} />
+                          <label className="text-sm font-medium text-[#1e3a5f]">
+                            Tujuan
+                          </label>
+
+                          <input
+                            className={inputClass}
+                            value={editData.tujuan}
+                            onChange={(e) =>
+                              setEditData((data: any) => ({
+                                ...data,
+                                tujuan: e.target.value,
+                              }))
+                            }
+                          />
                         </div>
 
                         <div className="md:col-span-2">
-                          <label className="text-xs font-semibold text-gray-600 uppercase">Catatan</label>
-                          <textarea className="mt-1 w-full px-3 py-2 border rounded-md" value={editData.catatan} onChange={(e) => setEditData((d: any) => ({ ...d, catatan: e.target.value }))} />
+                          <label className="text-sm font-medium text-[#1e3a5f]">
+                            Catatan
+                          </label>
+
+                          <textarea
+                            className={`${inputClass} min-h-[110px] resize-none`}
+                            value={editData.catatan}
+                            onChange={(e) =>
+                              setEditData((data: any) => ({
+                                ...data,
+                                catatan: e.target.value,
+                              }))
+                            }
+                          />
                         </div>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-end gap-3">
-                        <button type="button" onClick={() => setEditMode(false)} className="px-4 py-2 border rounded-md bg-white">Batal</button>
-                        <button type="submit" className="px-4 py-2 rounded-md bg-[#1e3a5f] text-white">{updating ? 'Menyimpan...' : 'Simpan Perubahan'}</button>
+                      <div className="mt-5 flex flex-col gap-3 border-t border-[#e2e8f0] pt-5 sm:flex-row sm:items-center sm:justify-end">
+                        <button
+                          type="button"
+                          onClick={() => setEditMode(false)}
+                          className="inline-flex items-center justify-center rounded-xl bg-white px-5 py-3 text-sm font-medium text-[#64748b] ring-1 ring-[#d8e1ee] transition-colors hover:bg-[#f8fafc] hover:text-[#1e3a5f]"
+                        >
+                          Batal
+                        </button>
+
+                        <button
+                          type="submit"
+                          disabled={updating}
+                          className="inline-flex items-center justify-center rounded-xl bg-[#1e3a5f] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#27466f] disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {updating ? "Menyimpan..." : "Simpan Perubahan"}
+                        </button>
                       </div>
                     </form>
                   )}
+                </div>
+
+                {/* DETAIL RIGHT */}
+                <div className="space-y-5">
+                  <div className="rounded-2xl bg-[#f8fafc] p-4 ring-1 ring-[#d8e1ee]/60 sm:p-5">
+                    <h2 className="text-lg font-semibold text-[#1e3a5f]">
+                      Kontak Pemesan
+                    </h2>
+
+                    <p className="mt-1 text-sm text-[#64748b]">
+                      Informasi kontak dan catatan tambahan.
+                    </p>
+
+                    <div className="mt-4 space-y-4">
+                      <DetailCard label="No. WhatsApp" value={pemesanan.noWa} />
+
+                      <a
+                        href={`https://wa.me/${pemesanan.noWa.replace(
+                          /[^\d]/g,
+                          ""
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex w-full items-center justify-center rounded-xl bg-[#d4af37] px-4 py-3 text-sm font-semibold text-[#1e3a5f] transition-colors hover:bg-[#c9a52f]"
+                      >
+                        Buka Chat WhatsApp
+                      </a>
+
+                      {pemesanan.email && (
+                        <DetailCard label="Email" value={pemesanan.email} />
+                      )}
+
+                      {pemesanan.perusahaan && (
+                        <DetailCard
+                          label="Perusahaan"
+                          value={pemesanan.perusahaan}
+                        />
+                      )}
+
+                      {pemesanan.catatan && (
+                        <DetailCard label="Catatan" value={pemesanan.catatan} />
+                      )}
+
+                      <DetailCard
+                        label="Diperbarui Pada"
+                        value={formatDate(pemesanan.updatedAt)}
+                      />
+                    </div>
+                  </div>
+
+                  <form
+                    onSubmit={handleUpdateStatus}
+                    className="rounded-2xl bg-[#f8fafc] p-4 ring-1 ring-[#d8e1ee]/60 sm:p-5"
+                  >
+                    <h2 className="text-lg font-semibold text-[#1e3a5f]">
+                      Update Status
+                    </h2>
+
+                    <p className="mt-1 text-sm text-[#64748b]">
+                      Atur status terbaru untuk pemesanan ini.
+                    </p>
+
+                    <div className="mt-4">
+                      <label className="mb-2 block text-sm font-medium text-[#1e3a5f]">
+                        Status Pemesanan
+                      </label>
+
+                      <select
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value as any)}
+                        className="w-full rounded-xl border border-[#d8e1ee] bg-white px-4 py-3 text-sm text-[#1e3a5f] outline-none transition-colors focus:border-[#1e3a5f]"
+                      >
+                        <option value="PENDING">Menunggu Konfirmasi</option>
+                        <option value="DIKONFIRMASI">Dikonfirmasi</option>
+                        <option value="DITOLAK">Ditolak</option>
+                        <option value="DIBATALKAN">Dibatalkan</option>
+                        <option value="SELESAI">Selesai</option>
+                      </select>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={updating}
+                      className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-[#1e3a5f] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#27466f] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {updating ? "Menyimpan..." : "Simpan Status"}
+                    </button>
+                  </form>
                 </div>
               </div>
             )}

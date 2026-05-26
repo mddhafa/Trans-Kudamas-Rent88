@@ -51,7 +51,10 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
 
   const handleNavigate = (page: string) => {
     onNavigate(page);
-    setIsOpen(false);
+
+    if (!isDesktop) {
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -71,7 +74,11 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
       {isOpen && (
         <div
           className="lg:hidden fixed inset-0 bg-black/50 z-30 transition-opacity"
-          onClick={() => setIsOpen(false)}
+          onClick={() => {
+            if (!isDesktop) {
+              setIsOpen(false);
+            }
+          }}
         />
       )}
 
@@ -89,11 +96,17 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
       {/* Desktop toggle moved inside sidebar header for better layout */}
 
       {/* Sidebar */}
-      <div className={`flex h-auto flex-col overflow-hidden rounded-3xl bg-[#1e3a5f] shadow-[0_12px_40px_rgba(30,58,95,0.18)] ring-1 ring-white/10 transition-all duration-300 ease-out 
-        fixed left-0 top-0 bottom-0 z-40 w-64 min-h-screen
-        lg:relative lg:min-h-screen lg:rounded-3xl lg:translate-x-0 ${
-        isOpen ? 'translate-x-0 lg:w-64' : '-translate-x-full lg:w-0'
-      }`}>
+      <div
+      className={`flex flex-col overflow-hidden bg-[#1e3a5f] shadow-[0_12px_40px_rgba(30,58,95,0.18)] ring-1 ring-white/10 transition-all duration-300 ease-out
+
+      fixed left-0 top-0 bottom-0 z-40 w-64 min-h-screen rounded-none
+
+      lg:fixed lg:left-4 lg:top-4 lg:bottom-4 lg:h-[calc(100vh-2rem)] lg:min-h-0 lg:rounded-3xl ${
+        isOpen
+          ? "translate-x-0 lg:w-64"
+          : "-translate-x-full lg:translate-x-0 lg:w-0 lg:opacity-0 lg:pointer-events-none"
+      }`}
+    >
       <div className="border-b border-[#2d4a6f] p-5 lg:p-6 mt-16 lg:mt-0">
         <div className="flex items-center justify-between">
           <div>
@@ -112,10 +125,14 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
       </div>
 
       <Link
-        href="/admin/profile"
-        onClick={() => setIsOpen(false)}
-        className="border-b border-[#2d4a6f] p-4 lg:p-5 hover:bg-[#2d4a6f]/50 transition-colors cursor-pointer"
-      >
+      href="/admin/profile"
+      onClick={() => {
+        if (!isDesktop) {
+          setIsOpen(false);
+        }
+      }}
+      className="border-b border-[#2d4a6f] p-4 lg:p-5 hover:bg-[#2d4a6f]/50 transition-colors cursor-pointer"
+    >
         <div className="flex items-center gap-3">
           <User size={48} className="text-[#d4af37]" />
           <div>
@@ -148,7 +165,11 @@ export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
               <Link
                 href={href}
                 key={item.id}
-                onClick={() => setIsOpen(false)}
+                onClick={() => {
+                  if (!isDesktop) {
+                    setIsOpen(false);
+                  }
+                }}
                 className={isActive ? activeClass : baseClass}
               >
                 <span className={`absolute left-0 top-0 h-full w-1 rounded-r-full ${isActive ? 'bg-[#d4af37]' : 'bg-transparent'}`} />

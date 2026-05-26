@@ -153,8 +153,11 @@ export default function AboutPage() {
               ].map((item, index) => (
                 <motion.div
                   key={index}
-                  className="bg-card rounded-xl border border-border/50 p-6 text-center hover:shadow-lg transition-all"
-                  whileHover={{ y: -4 }}
+                  className="bg-card rounded-xl border border-border/50 p-6 text-center transition-all"
+                  whileHover={{
+                    y: -4,
+                    boxShadow: "0 18px 45px rgba(201, 166, 104, 0.18)",
+                  }}
                   transition={{ duration: 0.3 }}
                 >
                   <div className="w-14 h-14 bg-gold/10 rounded-xl flex items-center justify-center mx-auto mb-4">
