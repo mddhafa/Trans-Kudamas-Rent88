@@ -141,16 +141,18 @@ export function MobilCarouselAPI() {
                 <div className="bg-card border border-border/50 rounded-[28px] overflow-hidden hover:border-gold/40 transition-all">
 
                   {/* IMAGE */}
-                  <div className="aspect-[4/3] relative bg-muted">
-                    <img
-                      src={getMobilImageSrc(mobil)}
-                      alt={mobil.nama}
-                      className="w-full h-full object-cover"
-                      onError={(event) => {
-                        event.currentTarget.onerror = null;
-                        event.currentTarget.src = "/file.svg";
-                      }}
-                    />
+                  <div className="aspect-[4/3] relative bg-gradient-to-br from-muted to-background overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center p-6">
+                      <img
+                        src={getMobilImageSrc(mobil)}
+                        alt={mobil.nama}
+                        className="w-full h-auto max-h-full object-contain drop-shadow-lg"
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = "/file.svg";
+                        }}
+                      />
+                    </div>
                   </div>
 
                   {/* CONTENT */}
