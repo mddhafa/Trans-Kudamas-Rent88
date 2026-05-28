@@ -60,6 +60,7 @@ type Mobil = {
 function CatalogContent() {
 	const [mobils, setMobils] = useState<Mobil[]>([]);
 	const [currentPage, setCurrentPage] = useState("katalog");
+	const [sidebarOpen, setSidebarOpen] = useState(true);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const searchParams = useSearchParams();
@@ -111,10 +112,19 @@ function CatalogContent() {
 		<main className="min-h-screen w-full overflow-x-hidden bg-[#edf2f8] text-[#1e3a5f]">
 			<div className="min-h-screen w-full px-3 py-3 lg:px-4 lg:py-4">
 				<aside>
-				<Sidebar currentPage={currentPage} onNavigate={handleNavigate} />
+				<Sidebar
+				currentPage={currentPage}
+				onNavigate={handleNavigate}
+				isOpen={sidebarOpen}
+				setIsOpen={setSidebarOpen}
+				/>
 				</aside>
 
-				<div className="min-w-0 space-y-5 lg:ml-[17.5rem]">
+				<div
+				className={`min-w-0 space-y-5 transition-all duration-300 ease-out ${
+					sidebarOpen ? "lg:ml-[17.5rem]" : "lg:ml-0"
+				}`}
+				>
 					<div className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur">
 						<div className="mb-4 flex items-center justify-between">
 							<div>

@@ -55,6 +55,7 @@ export default function DetailPemesananPage() {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (!id) return;
@@ -320,10 +321,17 @@ export default function DetailPemesananPage() {
     <main className="min-h-screen w-full overflow-x-hidden bg-[#edf2f8] text-[#1e3a5f]">
       <div className="min-h-screen w-full px-3 py-3 lg:px-4 lg:py-4">
         <aside>
-          <Sidebar currentPage={"pemesanan"} onNavigate={() => {}} />
+          <aside>
+            <Sidebar
+              currentPage="pemesanan"
+              onNavigate={() => {}}
+              isOpen={sidebarOpen}
+              setIsOpen={setSidebarOpen}
+            />
+          </aside>
         </aside>
 
-        <div className="min-w-0 space-y-5 lg:ml-[17.5rem]">
+        <div className={`min-w-0 space-y-5 transition-all duration-300 ease-out ${sidebarOpen ? "lg:ml-[17.5rem]" : "lg:ml-0"}`}>
           <Link
             href="/admin/pemesanan"
             className="inline-flex items-center gap-2 text-sm font-medium text-[#1e3a5f] hover:underline"

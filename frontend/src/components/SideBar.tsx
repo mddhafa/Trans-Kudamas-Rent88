@@ -10,6 +10,8 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 interface SidebarProps {
   currentPage: string;
   onNavigate: (page: string) => void;
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 type AdminProfile = {
@@ -18,9 +20,13 @@ type AdminProfile = {
   createdAt: string;
 };
 
-export function Sidebar({ currentPage, onNavigate }: SidebarProps) {
+export function Sidebar({
+  currentPage,
+  onNavigate,
+  isOpen,
+  setIsOpen,
+}: SidebarProps) {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(true);
   const [admin, setAdmin] = useState<AdminProfile | null>(null);
   const [isDesktop, setIsDesktop] = useState(false);
 

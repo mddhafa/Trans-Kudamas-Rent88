@@ -15,6 +15,7 @@ export default function NewMobilPage() {
   const [files, setFiles] = useState<FileWithPreview[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
     const list = e.target.files;
@@ -93,10 +94,15 @@ export default function NewMobilPage() {
     <main className="min-h-screen w-full overflow-x-hidden bg-[#edf2f8] text-[#1e3a5f]">
       <div className="min-h-screen w-full px-3 py-3 lg:px-4 lg:py-4">
         <aside>
-          <Sidebar currentPage={"katalog"} onNavigate={() => {}} />
+          <Sidebar
+            currentPage="katalog"
+            onNavigate={() => {}}
+            isOpen={sidebarOpen}
+            setIsOpen={setSidebarOpen}
+          />
         </aside>
 
-        <div className="min-w-0 space-y-5 lg:ml-[17.5rem]">
+        <div className={`min-w-0 space-y-5 transition-all duration-300 ease-out ${sidebarOpen ? "lg:ml-[17.5rem]" : "lg:ml-0"}`}>
           <div className="rounded-3xl bg-white/92 p-4 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur sm:p-6">
             {/* HEADER */}
             <div className="mb-6 flex flex-col gap-4 border-b border-[#e2e8f0] pb-5 sm:flex-row sm:items-center sm:justify-between">

@@ -32,6 +32,7 @@ export default function ProfilePage() {
   const [currentPage, setCurrentPage] = useState("profile");
   const [admin, setAdmin] = useState<AdminProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     show: false,
@@ -112,10 +113,19 @@ export default function ProfilePage() {
       <main className="min-h-screen w-full overflow-x-hidden bg-[#edf2f8] text-[#1e3a5f]">
         <div className="min-h-screen w-full px-3 py-3 lg:px-4 lg:py-4">
           <aside>
-            <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+            <Sidebar
+              currentPage={currentPage}
+              onNavigate={setCurrentPage}
+              isOpen={sidebarOpen}
+              setIsOpen={setSidebarOpen}
+            />
           </aside>
 
-          <div className="min-w-0 space-y-5 lg:ml-[17.5rem]">
+          <div
+            className={`min-w-0 space-y-5 transition-all duration-300 ease-out ${
+              sidebarOpen ? "lg:ml-[17.5rem]" : "lg:ml-0"
+            }`}
+          >
             <div className="flex min-h-[calc(100vh-2rem)] items-center justify-center rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur">
               <div className="text-center">
                 <div className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-[#1e3a5f] border-t-[#d4af37]" />
@@ -135,10 +145,19 @@ export default function ProfilePage() {
     <main className="min-h-screen w-full overflow-x-hidden bg-[#edf2f8] text-[#1e3a5f]">
       <div className="min-h-screen w-full px-3 py-3 lg:px-4 lg:py-4">
         <aside>
-          <Sidebar currentPage={currentPage} onNavigate={setCurrentPage} />
+          <Sidebar
+            currentPage={currentPage}
+            onNavigate={setCurrentPage}
+            isOpen={sidebarOpen}
+            setIsOpen={setSidebarOpen}
+          />
         </aside>
 
-        <div className="min-w-0 space-y-5 lg:ml-[17.5rem]">
+        <div
+          className={`min-w-0 space-y-5 transition-all duration-300 ease-out ${
+            sidebarOpen ? "lg:ml-[17.5rem]" : "lg:ml-0"
+          }`}
+        >
           {/* Snackbar */}
           {snackbar.show && (
             <motion.div
