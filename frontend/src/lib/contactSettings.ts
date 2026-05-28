@@ -7,9 +7,9 @@ export type ContactSettings = {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 export const DEFAULT_CONTACT_SETTINGS: ContactSettings = {
-  phone: "+6289514693178",
-  whatsappNumber: "6289514693178",
-  email: "info@agilrent.com",
+  phone: "+6285777718390",
+  whatsappNumber: "6285779002910",
+  email: "dedynugroho@gmail.com",
 };
 
 export function normalizeContactSettings(

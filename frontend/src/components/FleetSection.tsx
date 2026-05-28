@@ -66,11 +66,11 @@ export function Footer() {
                 {contact.phone}
               </a>
               <a
-                href="mailto:info@agilrent.com"
+                href="mailto:dedynugroho@gmail.com"
                 className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-colors"
               >
                 <Mail className="w-5 h-5 text-gold" />
-                info@transkudamas88.com
+                dedynugroho@gmail.com
               </a>
               <a
                 href={`https://wa.me/${contact.whatsappNumber}`}
