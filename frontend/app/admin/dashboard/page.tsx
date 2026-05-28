@@ -106,23 +106,6 @@ const monthLabels = [
   "Des",
 ];
 
-const recentReviews: ReviewItem[] = [
-  {
-    id: 1,
-    customer: "Dewi Lestari",
-    rating: 5,
-    comment: "Pelayanan sangat memuaskan, mobil bersih dan nyaman",
-    date: "2026-05-06",
-  },
-  {
-    id: 2,
-    customer: "Andi Wijaya",
-    rating: 5,
-    comment: "Recommended! Prosesnya cepat dan profesional",
-    date: "2026-05-05",
-  },
-];
-
 function StatCard({ title, value, icon: Icon, iconColor }: StatCardProps) {
   return (
     <div className="rounded-xl border border-[#e2e8f0] bg-white p-6 shadow-sm">
@@ -758,47 +741,6 @@ export default function AdminDashboardPage() {
                   </div>
                 ) : null}
               </div>
-            </div>
-          </section>
-
-          <section
-            id="ulasan"
-            className="rounded-3xl bg-white/92 p-6 shadow-[0_12px_40px_rgba(30,58,95,0.08)] ring-1 ring-[#d8e1ee]/70 backdrop-blur"
-          >
-            <h2 className="mb-4 text-xl font-semibold text-[#1e3a5f]">
-              Ulasan Terbaru
-            </h2>
-
-            <div className="space-y-4">
-              {recentReviews.map((review) => (
-                <div
-                  key={review.id}
-                  className="rounded-2xl bg-[#f8f9fb] p-4 ring-1 ring-[#d8e1ee]/50"
-                >
-                  <div className="mb-2 flex items-center justify-between gap-4">
-                    <p className="text-[#1e3a5f]">{review.customer}</p>
-
-                    <div className="flex gap-1">
-                      {Array.from({ length: review.rating }).map((_, i) => (
-                        <span
-                          key={`review-${review.id}-star-${i}`}
-                          className="text-[#d4af37]"
-                        >
-                          ★
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-[#64748b]">
-                    {review.comment}
-                  </p>
-
-                  <p className="mt-2 text-xs text-[#94a3b8]">
-                    {review.date}
-                  </p>
-                </div>
-              ))}
             </div>
           </section>
 
