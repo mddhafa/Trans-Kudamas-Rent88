@@ -4,7 +4,7 @@ export type ContactSettings = {
   email: string;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export const DEFAULT_CONTACT_SETTINGS: ContactSettings = {
   phone: "+6285777718390",

@@ -6,7 +6,7 @@ import { Sidebar } from "@/src/components/SideBar";
 import Link from "next/link";
 import React from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 function Carousel({ fotos, alt, apiUrl }: { fotos: { id: number; url: string }[]; alt?: string; apiUrl: string }) {
 	const [index, setIndex] = React.useState(0);
 	const [paused, setPaused] = React.useState(false);

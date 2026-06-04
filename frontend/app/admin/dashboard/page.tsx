@@ -20,7 +20,7 @@ import {
   type ContactSettings,
 } from "@/src/lib/contactSettings";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 type AdminProfile = {
   id: number;
@@ -40,14 +40,6 @@ type BookingItem = {
   car: string;
   dateRange: string;
   status: string;
-};
-
-type ReviewItem = {
-  id: number;
-  customer: string;
-  rating: number;
-  comment: string;
-  date: string;
 };
 
 type FeaturedCar = {

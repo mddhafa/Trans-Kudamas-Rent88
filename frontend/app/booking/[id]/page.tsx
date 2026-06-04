@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Calendar, MapPin, User, Mail, Phone, Building2, MessageSquare, Car as CarIcon, Shield } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const layananOptions = [
   {
@@ -38,6 +38,26 @@ const layananLabels: Record<string, string> = {
   LUAR_KOTA: "Luar Kota",
   DROP_OFF: "Drop Off",
   LAINNYA: "Lainnya",
+};
+const formatJamIndonesia = (value?: string | null) => {
+  if (!value) return "-";
+
+  const [hour, minute] = value.split(":");
+
+  if (!hour || !minute) return "-";
+
+  return `${hour.padStart(2, "0")}.${minute.padStart(2, "0")} WIB`;
+};
+
+
+const formatTanggalIndonesia = (date?: string | null) => {
+  if (!date) return "-";
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(date));
 };
 
 type Foto = {
@@ -370,10 +390,13 @@ export default function BookingPage() {
                           </span>
                         </label>
                         <input
-                          type="time"
+                          type="text"
                           name="jamMulai"
                           value={formData.jamMulai}
                           onChange={handleChange}
+                          placeholder="Contoh: 08:00"
+                          inputMode="numeric"
+                          maxLength={5}
                           required
                           className={`w-full px-4 py-3.5 bg-white border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30 focus:border-[#d4af37] transition-all ${
                             errors.jamMulai ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
@@ -393,10 +416,13 @@ export default function BookingPage() {
                           </span>
                         </label>
                         <input
-                          type="time"
+                          type="text"
                           name="jamSelesai"
                           value={formData.jamSelesai}
                           onChange={handleChange}
+                          placeholder="Contoh: 17:00"
+                          inputMode="numeric"
+                          maxLength={5}
                           required
                           className={`w-full px-4 py-3.5 bg-white border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30 focus:border-[#d4af37] transition-all ${
                             errors.jamSelesai ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
@@ -470,10 +496,13 @@ export default function BookingPage() {
                           </span>
                         </label>
                         <input
-                          type="time"
+                          type="text"
                           name="jamMulai"
                           value={formData.jamMulai}
                           onChange={handleChange}
+                          placeholder="Contoh: 08:00"
+                          inputMode="numeric"
+                          maxLength={5}
                           required
                           className={`w-full px-4 py-3.5 bg-white border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30 focus:border-[#d4af37] transition-all ${
                             errors.jamMulai ? "border-red-500 bg-red-50" : "border-gray-300 hover:border-gray-400"
@@ -724,7 +753,7 @@ export default function BookingPage() {
                       {isHourlyRental ? "Tanggal Sewa" : "Tanggal Mulai"}
                     </span>
                     <span className="font-medium text-[#1e3a5f]">
-                      {formData.tanggalMulai || "-"}
+                      {formatTanggalIndonesia(formData.tanggalMulai)}
                     </span>
                   </div>
 
@@ -733,14 +762,14 @@ export default function BookingPage() {
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Jam Mulai</span>
                         <span className="font-medium text-[#1e3a5f]">
-                          {formData.jamMulai || "-"}
+                          {formatJamIndonesia(formData.jamMulai)}
                         </span>
                       </div>
 
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Jam Selesai</span>
                         <span className="font-medium text-[#1e3a5f]">
-                          {formData.jamSelesai || "-"}
+                          {formatJamIndonesia(formData.jamSelesai)}
                         </span>
                       </div>
                     </>
@@ -749,7 +778,7 @@ export default function BookingPage() {
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Tanggal Selesai</span>
                         <span className="font-medium text-[#1e3a5f]">
-                          {formData.tanggalSelesai || "-"}
+                          {formatTanggalIndonesia(formData.tanggalSelesai)}
                         </span>
                       </div>
 
