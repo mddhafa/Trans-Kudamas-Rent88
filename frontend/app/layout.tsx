@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+
 export const metadata: Metadata = {
   title: "KudaMas Rent 88",
   description: "Rental mobil profesional untuk kebutuhan bisnis dan keluarga",
