@@ -5,7 +5,7 @@ import { Sidebar } from "@/src/components/SideBar";
 import Link from "next/link";
 import { LineChart, Calendar } from "lucide-react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type RekapBulan = {
   bulan: string;

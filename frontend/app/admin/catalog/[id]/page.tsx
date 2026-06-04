@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Sidebar } from "@/src/components/SideBar";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Foto = { id: number; url: string };
 type Mobil = { id: number; nama: string; deskripsi: string; kategori?: string; fotos?: Foto[] };

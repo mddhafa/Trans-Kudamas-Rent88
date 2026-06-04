@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Sidebar } from "@/src/components/SideBar";
 import Link from "next/link";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Mobil = {
   id: number;

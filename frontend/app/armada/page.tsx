@@ -5,7 +5,7 @@ import Link from "next/link";
 import { FileText, Wind, UserCheck, Briefcase, Loader } from "lucide-react";
 import { motion } from "framer-motion";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 type CategoryFilter = 'all' | 'passenger' | 'bus';
 
 interface Car {

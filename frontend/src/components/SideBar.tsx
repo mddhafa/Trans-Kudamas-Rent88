@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { LayoutDashboard, Car, Calendar, MessageSquare, Settings, LogOut, Menu, X, ChevronLeft, ChevronRight, User } from 'lucide-react';
 import Link from 'next/link';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface SidebarProps {
   currentPage: string;

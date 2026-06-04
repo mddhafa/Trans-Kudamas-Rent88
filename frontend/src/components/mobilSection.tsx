@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Users, Wind, UserCheck, Briefcase } from "lucide-react";
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_API_URL;
 
 interface Foto {
   id: string | number;
