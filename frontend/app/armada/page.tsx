@@ -4,6 +4,10 @@ import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { FileText, Wind, UserCheck, Briefcase, Loader } from "lucide-react";
 import { motion } from "framer-motion";
+import {
+  DEFAULT_CONTACT_SETTINGS,
+  type ContactSettings,
+} from "@/src/lib/contactSettings";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 type CategoryFilter = 'all' | 'passenger' | 'bus';
@@ -24,6 +28,8 @@ export default function CarsPage() {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [contact] = useState<ContactSettings>(DEFAULT_CONTACT_SETTINGS);
+  
 
   useEffect(() => {
     const fetchCars = async () => {
@@ -245,7 +251,7 @@ export default function CarsPage() {
 
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border p-4 shadow-lg z-40">
         <a
-          href="https://wa.me/6283138606502"
+          href={`https://wa.me/${contact.whatsappNumber}`}
           className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-accent text-accent-foreground rounded-lg hover:bg-accent/90 transition-all tracking-wide"
         >
           <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
